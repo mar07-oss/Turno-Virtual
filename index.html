@@ -1,0 +1,1327 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Turno Crítico: El Factor Humano | Simulador Interactivo de Gestión</title>
+  <style>
+    :root {
+      --bg-main: #0a0e17;
+      --bg-panel: #111827;
+      --bg-card: #1e293b;
+      --bg-card-hover: #273549;
+      --border-subtle: #334155;
+      --border-focus: #38bdf8;
+
+      --text-primary: #f8fafc;
+      --text-secondary: #94a3b8;
+      --text-muted: #64748b;
+
+      --accent-cyan: #06b6d4;
+      --accent-cyan-glow: rgba(6, 182, 212, 0.25);
+      --color-danger: #ef4444;
+      --color-danger-glow: rgba(239, 68, 68, 0.25);
+      --color-warning: #f59e0b;
+      --color-warning-glow: rgba(245, 158, 11, 0.25);
+      --color-success: #10b981;
+      --color-success-glow: rgba(16, 185, 129, 0.25);
+
+      --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', monospace;
+
+      --radius-sm: 6px;
+      --radius-md: 12px;
+      --radius-lg: 16px;
+      --radius-full: 9999px;
+
+      --shadow-sm: 0 2px 4px rgba(0,0,0,0.3);
+      --shadow-md: 0 4px 14px rgba(0,0,0,0.45);
+      --shadow-lg: 0 10px 30px rgba(0,0,0,0.6);
+
+      --transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-main);
+      color: var(--text-primary);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      background-image:
+        radial-gradient(ellipse 90% 60% at 50% -10%, rgba(6, 182, 212, 0.12), transparent 75%),
+        radial-gradient(ellipse 60% 50% at 50% 120%, rgba(30, 41, 59, 0.5), transparent),
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px;
+      background-attachment: fixed;
+      position: relative;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: radial-gradient(circle 800px at 50% 200px, rgba(14, 165, 233, 0.04), transparent 80%);
+      pointer-events: none;
+      z-index: 0;
+      animation: ambientLightPulse 10s ease-in-out infinite alternate;
+    }
+    @keyframes ambientLightPulse {
+      0% { opacity: 0.5; transform: scale(0.98); }
+      50% { opacity: 0.9; transform: scale(1.02); }
+      100% { opacity: 0.5; transform: scale(0.98); }
+    }
+
+    .container { width: 100%; max-width: 1040px; margin: 0 auto; padding: 1rem 1.25rem 3rem; flex: 1; }
+
+    .app-header {
+      background: rgba(17, 24, 39, 0.85);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border-subtle);
+      position: sticky; top: 0; z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+    .header-inner {
+      max-width: 1040px; margin: 0 auto; padding: 0.75rem 1.25rem;
+      display: flex; align-items: center; justify-content: space-between; gap: 1rem;
+    }
+    .brand-group { display: flex; align-items: center; gap: 0.75rem; }
+    .factory-icon {
+      width: 34px; height: 34px;
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border: 1px solid var(--accent-cyan); border-radius: var(--radius-sm);
+      display: flex; align-items: center; justify-content: center;
+      color: var(--accent-cyan); box-shadow: 0 0 12px var(--accent-cyan-glow);
+    }
+    .brand-title {
+      font-size: 1.05rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
+      color: var(--text-primary); display: flex; align-items: center; gap: 0.5rem;
+    }
+    .brand-badge {
+      font-size: 0.65rem; font-weight: 700;
+      background: rgba(6, 182, 212, 0.15); border: 1px solid var(--accent-cyan); color: var(--accent-cyan);
+      padding: 0.15rem 0.45rem; border-radius: var(--radius-full); letter-spacing: 0.08em;
+    }
+    .header-controls { display: flex; align-items: center; gap: 0.5rem; }
+
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem;
+      padding: 0.6rem 1.1rem; font-size: 0.9rem; font-weight: 600;
+      border-radius: var(--radius-md); border: 1px solid transparent;
+      cursor: pointer; transition: var(--transition); user-select: none;
+      min-height: 44px; text-decoration: none; font-family: inherit;
+    }
+    .btn:active { transform: scale(0.98); }
+    .btn-icon {
+      padding: 0.5rem; width: 42px; height: 42px; min-height: 42px; border-radius: var(--radius-md);
+      background: var(--bg-card); border: 1px solid var(--border-subtle); color: var(--text-secondary);
+    }
+    .btn-icon:hover { background: var(--bg-card-hover); color: var(--text-primary); border-color: var(--accent-cyan); }
+    .btn-icon.active { color: var(--accent-cyan); border-color: var(--accent-cyan); background: rgba(6, 182, 212, 0.1); }
+    .btn-primary {
+      background: linear-gradient(135deg, #0284c7, #0369a1); color: #ffffff; border-color: #38bdf8;
+      box-shadow: 0 4px 15px rgba(2, 132, 199, 0.35);
+    }
+    .btn-primary:hover { background: linear-gradient(135deg, #0369a1, #075985); box-shadow: 0 6px 20px rgba(2, 132, 199, 0.5); transform: translateY(-1px); }
+    .btn-outline { background: rgba(30, 41, 59, 0.6); border-color: var(--border-subtle); color: var(--text-secondary); }
+    .btn-outline:hover { background: var(--bg-card-hover); color: var(--text-primary); border-color: var(--text-muted); }
+    .btn-large { padding: 0.85rem 1.75rem; font-size: 1.05rem; font-weight: 700; border-radius: var(--radius-lg); }
+
+    .screen { display: none; opacity: 0; transform: translateY(12px); transition: opacity 0.35s ease, transform 0.35s ease; }
+    .screen.active { display: block; opacity: 1; transform: translateY(0); animation: fadeInScreen 0.4s ease forwards; }
+    @keyframes fadeInScreen { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+    /* HUD de turno persistente */
+    .turn-hud {
+      display: none;
+      grid-template-columns: repeat(3, 1fr);
+      gap: .75rem;
+      background: rgba(17,24,39,.7);
+      border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-md);
+      padding: .85rem 1rem;
+      margin: 1rem 0 1.25rem;
+    }
+    .turn-hud.show { display: grid; }
+    .turn-hud .h-item { display:flex; flex-direction:column; gap:.3rem; }
+    .turn-hud .h-top { display:flex; justify-content:space-between; font-size:.72rem; color: var(--text-muted); font-weight:700; text-transform:uppercase; letter-spacing:.05em; }
+    .turn-hud .h-val { font-family: var(--font-mono); color: var(--text-primary); }
+    .turn-hud .h-bar { height: 6px; background:#1e293b; border-radius: var(--radius-full); overflow:hidden; }
+    .turn-hud .h-fill { height:100%; width:0; border-radius: var(--radius-full); transition: width .8s cubic-bezier(.16,1,.3,1), background-color .4s ease; }
+
+    .scene-progress {
+      display: flex; align-items: center; justify-content: center; gap: .75rem;
+      margin: 0 auto 1.25rem; max-width: 640px; padding: .4rem .9rem;
+      background: rgba(17, 24, 39, 0.6); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full);
+    }
+    .scene-dot {
+      width: 24px; height: 24px; border-radius: 50%;
+      display:flex; align-items:center; justify-content:center;
+      font-size:.7rem; font-weight:800; background:#1e293b;
+      border: 1.5px solid var(--border-subtle); color: var(--text-muted);
+    }
+    .scene-dot.active { border-color: var(--accent-cyan); color: var(--accent-cyan); background: rgba(6,182,212,.15); }
+    .scene-dot.done { border-color: var(--color-success); color: var(--color-success); background: rgba(16,185,129,.15); }
+    .scene-seg { flex:1; height:2px; background: var(--border-subtle); }
+    .scene-seg.done { background: linear-gradient(90deg, var(--color-success), var(--accent-cyan)); }
+
+    .flow-stepper {
+      display: flex; align-items: center; justify-content: center; gap: 1.5rem;
+      margin: 1.5rem auto 1.75rem; max-width: 600px; padding: 0.5rem 1rem;
+      background: rgba(17, 24, 39, 0.6); border: 1px solid var(--border-subtle);
+      border-radius: var(--radius-full); backdrop-filter: blur(8px);
+    }
+    .step-item { display: flex; align-items: center; gap: 0.5rem; font-size: 0.8rem; font-weight: 700; color: var(--text-muted); cursor: pointer; transition: var(--transition); user-select: none; padding: 0.25rem 0.5rem; border-radius: var(--radius-full); }
+    .step-item:hover { color: var(--text-secondary); }
+    .step-item.active { color: var(--accent-cyan); }
+    .step-item.completed { color: var(--color-success); }
+    .step-circle { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 800; background: #1e293b; border: 1.5px solid var(--border-subtle); transition: var(--transition); }
+    .step-item.active .step-circle { border-color: var(--accent-cyan); background: rgba(6, 182, 212, 0.15); color: var(--accent-cyan); box-shadow: 0 0 10px var(--accent-cyan-glow); }
+    .step-item.completed .step-circle { border-color: var(--color-success); background: rgba(16, 185, 129, 0.15); color: var(--color-success); }
+    .step-divider { flex: 1; height: 2px; background: var(--border-subtle); border-radius: 2px; transition: var(--transition); }
+    .step-divider.active { background: linear-gradient(90deg, var(--color-success), var(--accent-cyan)); }
+
+    .briefing-step { display: none; opacity: 0; transform: translateY(16px); transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1), transform 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
+    .briefing-step.active { display: block; opacity: 1; transform: translateY(0); animation: slideUpFade 0.45s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+    @keyframes slideUpFade { from { opacity: 0; transform: translateY(18px) scale(0.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+    .hero-banner {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.98));
+      border: 1px solid var(--border-subtle); border-left: 5px solid var(--accent-cyan);
+      border-radius: var(--radius-lg); padding: 2.25rem 2rem; margin-top: 0.75rem;
+      box-shadow: 0 12px 35px rgba(0, 0, 0, 0.45); position: relative; overflow: hidden;
+    }
+    .hero-banner::after {
+      content: ''; position: absolute; right: -50px; top: -50px; width: 240px; height: 240px;
+      background: radial-gradient(circle, var(--accent-cyan-glow) 0%, transparent 70%); pointer-events: none;
+    }
+    .hero-badge-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.75rem; margin-bottom: 1.25rem; }
+    .hero-tag { font-size: 0.75rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.35rem 0.75rem; border-radius: var(--radius-sm); display: inline-flex; align-items: center; gap: 0.4rem; }
+    .tag-role { background: rgba(14, 165, 233, 0.15); border: 1px solid #0ea5e9; color: #38bdf8; }
+    .tag-crisis { background: rgba(239, 68, 68, 0.15); border: 1px solid #ef4444; color: #f87171; }
+    .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: #ef4444; box-shadow: 0 0 8px #ef4444; animation: pingRadar 1.8s infinite cubic-bezier(0, 0, 0.2, 1); }
+    @keyframes pingRadar { 0% { transform: scale(0.9); opacity: 1; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); } 70% { transform: scale(1.1); opacity: 0.8; box-shadow: 0 0 0 8px rgba(239, 68, 68, 0); } 100% { transform: scale(0.9); opacity: 1; box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); } }
+    .tag-context { background: rgba(245, 158, 11, 0.15); border: 1px solid #f59e0b; color: #fbbf24; }
+    .hero-title { font-size: 2.1rem; font-weight: 900; line-height: 1.25; color: var(--text-primary); margin-bottom: 0.85rem; letter-spacing: -0.01em; }
+    .hero-desc { color: #cbd5e1; font-size: 1.05rem; line-height: 1.7; max-width: 860px; margin-bottom: 1.5rem; }
+
+    .kpi-strip { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; margin-top: 1.75rem; }
+    .kpi-card { background: rgba(15, 23, 42, 0.8); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.35rem 1.25rem; display: flex; flex-direction: column; gap: 0.4rem; position: relative; transition: var(--transition); box-shadow: var(--shadow-sm); }
+    .kpi-card:hover { border-color: rgba(56, 189, 248, 0.4); transform: translateY(-2px); box-shadow: 0 8px 20px rgba(0,0,0,0.3); }
+    .kpi-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; border-radius: var(--radius-md) var(--radius-md) 0 0; background: var(--border-subtle); transition: var(--transition); }
+    .kpi-card.danger::before { background: var(--color-danger); }
+    .kpi-card.warning::before { background: var(--color-warning); }
+    .kpi-card.info::before { background: var(--accent-cyan); }
+    .kpi-label { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--text-muted); display: flex; align-items: center; gap: 0.4rem; }
+    .kpi-value { font-size: 1.85rem; font-weight: 900; font-family: var(--font-mono); display: flex; align-items: baseline; gap: 0.5rem; margin: 0.2rem 0; letter-spacing: -0.02em; }
+    .kpi-value.danger { color: #f87171; text-shadow: 0 0 15px rgba(239, 68, 68, 0.25); }
+    .kpi-value.warning { color: #fbbf24; text-shadow: 0 0 15px rgba(245, 158, 11, 0.25); }
+    .kpi-value.info { color: #38bdf8; text-shadow: 0 0 15px rgba(56, 189, 248, 0.25); }
+    .kpi-sub { font-size: 0.82rem; color: var(--text-secondary); line-height: 1.4; }
+
+    .dialogue-section { background: var(--bg-panel); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 2rem; box-shadow: var(--shadow-lg); position: relative; }
+    .section-header { display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 1.25rem; margin-bottom: 1.75rem; flex-wrap: wrap; gap: 1rem; }
+    .section-title { font-size: 1.25rem; font-weight: 800; display: flex; align-items: center; gap: 0.75rem; color: var(--text-primary); }
+    .dialogue-tabs { display: flex; gap: 0.5rem; background: var(--bg-main); padding: 0.35rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle); }
+    .d-tab { background: transparent; border: none; color: var(--text-muted); padding: 0.6rem 1.1rem; font-size: 0.88rem; font-weight: 700; border-radius: var(--radius-sm); cursor: pointer; transition: var(--transition); display: flex; align-items: center; gap: 0.5rem; font-family: inherit; }
+    .d-tab:hover { color: var(--text-primary); }
+    .d-tab.active { background: var(--bg-card); color: var(--accent-cyan); box-shadow: 0 2px 8px rgba(0,0,0,0.3); border: 1px solid rgba(6, 182, 212, 0.3); }
+    .dialogue-view { display: none; }
+    .dialogue-view.active { display: block; animation: fadeInDialogue 0.35s ease; }
+    @keyframes fadeInDialogue { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+    .dialogue-box { display: flex; gap: 1.75rem; background: rgba(30, 41, 59, 0.45); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 2rem 1.75rem; box-shadow: inset 0 2px 6px rgba(0,0,0,0.25); }
+    @media (max-width: 768px) { .dialogue-box { flex-direction: column; align-items: center; text-align: center; padding: 1.5rem 1.25rem; gap: 1.25rem; } }
+    .avatar-wrapper { flex-shrink: 0; text-align: center; width: 130px; }
+    .avatar-img { width: 96px; height: 96px; border-radius: var(--radius-lg); margin: 0 auto 0.75rem; display: flex; align-items: center; justify-content: center; font-size: 2.75rem; background: #1e293b; border: 2px solid var(--border-subtle); box-shadow: 0 6px 18px rgba(0,0,0,0.35); transition: var(--transition); position: relative; }
+    .avatar-carlos { border-color: #f59e0b; background: linear-gradient(135deg, #382405, #1e293b); box-shadow: 0 6px 20px rgba(245, 158, 11, 0.2); }
+    .avatar-mendoza { border-color: #ef4444; background: linear-gradient(135deg, #450a0a, #1e293b); box-shadow: 0 6px 20px rgba(239, 68, 68, 0.2); }
+    .avatar-name { font-size: 1rem; font-weight: 800; color: var(--text-primary); line-height: 1.2; }
+    .avatar-role { font-size: 0.75rem; color: var(--text-muted); line-height: 1.35; margin-top: 0.3rem; font-weight: 600; }
+    .bubble-wrapper { flex: 1; display: flex; flex-direction: column; justify-content: center; position: relative; }
+    .dialogue-bubble { position: relative; background: rgba(15, 23, 42, 0.9); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.5rem 1.6rem; color: #f1f5f9; font-size: 1.05rem; font-style: italic; line-height: 1.75; min-height: 130px; box-shadow: 0 4px 12px rgba(0,0,0,0.25); }
+    .typing-cursor { display: inline-block; width: 3px; height: 1.1em; background: var(--accent-cyan); vertical-align: text-bottom; margin-left: 2px; animation: blinkCursor 0.7s infinite; }
+    @keyframes blinkCursor { 0%, 100% { opacity: 1; } 50% { opacity: 0; } }
+    .dialogue-meta { margin-top: 1rem; display: flex; align-items: center; gap: 0.75rem; font-size: 0.85rem; flex-wrap: wrap; }
+    .intel-badge { background: rgba(56, 189, 248, 0.12); border: 1px solid rgba(56, 189, 248, 0.35); color: #38bdf8; padding: 0.3rem 0.65rem; border-radius: var(--radius-sm); font-size: 0.75rem; font-weight: 800; letter-spacing: 0.05em; }
+    .dialogue-summary { color: #cbd5e1; font-style: normal; font-size: 0.9rem; line-height: 1.5; }
+    .typewriter-ctrl { margin-top: 0.75rem; display: flex; justify-content: flex-end; }
+    .btn-skip-typing { background: transparent; border: none; color: var(--text-muted); font-size: 0.75rem; font-weight: 600; cursor: pointer; text-decoration: underline; padding: 0.2rem 0.4rem; transition: var(--transition); font-family: inherit; }
+    .btn-skip-typing:hover { color: var(--accent-cyan); }
+    .dialogue-footer-nav { margin-top: 1.75rem; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; border-top: 1px solid var(--border-subtle); padding-top: 1.5rem; }
+
+    .btn-glow-pulse { position: relative; background: linear-gradient(135deg, #0284c7, #0369a1); color: #ffffff; border: 1px solid #38bdf8; box-shadow: 0 4px 20px rgba(2, 132, 199, 0.4), 0 0 30px rgba(6, 182, 212, 0.2); animation: pulseGlowBtn 3s infinite ease-in-out; }
+    @keyframes pulseGlowBtn { 0%, 100% { box-shadow: 0 4px 20px rgba(2, 132, 199, 0.4), 0 0 20px rgba(6, 182, 212, 0.2); } 50% { box-shadow: 0 6px 25px rgba(2, 132, 199, 0.6), 0 0 35px rgba(6, 182, 212, 0.45); transform: translateY(-1px); } }
+
+    .console-header { margin-top: 1.25rem; margin-bottom: 1.5rem; text-align: center; }
+    .console-title { font-size: 1.6rem; font-weight: 800; margin-bottom: 0.35rem; }
+    .console-subtitle { color: var(--text-secondary); font-size: 0.95rem; }
+
+    .cards-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 1.5rem; }
+    .decision-card { background: var(--bg-panel); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between; position: relative; transition: var(--transition); cursor: pointer; box-shadow: var(--shadow-sm); overflow: hidden; }
+    .decision-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px; transition: var(--transition); }
+    .card-a::before { background: var(--color-danger); }
+    .card-a:hover { border-color: var(--color-danger); box-shadow: 0 8px 25px var(--color-danger-glow); transform: translateY(-4px); }
+    .card-a .opt-tag { background: rgba(239, 68, 68, 0.15); border: 1px solid var(--color-danger); color: #f87171; }
+    .card-b::before { background: var(--color-warning); }
+    .card-b:hover { border-color: var(--color-warning); box-shadow: 0 8px 25px var(--color-warning-glow); transform: translateY(-4px); }
+    .card-b .opt-tag { background: rgba(245, 158, 11, 0.15); border: 1px solid var(--color-warning); color: #fbbf24; }
+    .card-c::before { background: var(--color-success); }
+    .card-c:hover { border-color: var(--color-success); box-shadow: 0 8px 25px var(--color-success-glow); transform: translateY(-4px); }
+    .card-c .opt-tag { background: rgba(16, 185, 129, 0.15); border: 1px solid var(--color-success); color: #34d399; }
+    .card-head { margin-bottom: 1.1rem; }
+    .card-badge-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem; }
+    .opt-letter { font-size: 0.8rem; font-weight: 800; text-transform: uppercase; padding: 0.2rem 0.55rem; border-radius: var(--radius-sm); }
+    .opt-theory { font-size: 0.72rem; color: var(--text-muted); font-weight: 600; }
+    .card-title { font-size: 1.25rem; font-weight: 800; color: var(--text-primary); line-height: 1.3; margin-bottom: 0.4rem; }
+    .card-quote { font-size: 0.82rem; color: var(--text-secondary); font-style: italic; border-left: 2px solid var(--border-subtle); padding-left: 0.6rem; margin-bottom: 1rem; }
+    .measures-list { list-style: none; display: flex; flex-direction: column; gap: 0.6rem; margin-bottom: 1.5rem; }
+    .measure-item { display: flex; align-items: flex-start; gap: 0.5rem; font-size: 0.88rem; color: #cbd5e1; }
+    .measure-icon { flex-shrink: 0; margin-top: 0.2rem; font-size: 0.8rem; }
+    .card-btn { width: 100%; border-radius: var(--radius-md); padding: 0.75rem; font-weight: 700; font-size: 0.92rem; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+    .btn-a { background: rgba(239, 68, 68, 0.15); border: 1px solid var(--color-danger); color: #fca5a5; }
+    .btn-a:hover { background: var(--color-danger); color: #fff; }
+    .btn-b { background: rgba(245, 158, 11, 0.15); border: 1px solid var(--color-warning); color: #fcd34d; }
+    .btn-b:hover { background: var(--color-warning); color: #1e293b; }
+    .btn-c { background: rgba(16, 185, 129, 0.15); border: 1px solid var(--color-success); color: #6ee7b7; }
+    .btn-c:hover { background: var(--color-success); color: #064e3b; }
+
+    .resolution-banner { background: var(--bg-panel); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); padding: 1.75rem; margin-top: 1.25rem; box-shadow: var(--shadow-lg); position: relative; overflow: hidden; }
+    .resolution-badge-row { display: flex; flex-wrap: wrap; align-items: center; gap: 0.6rem; margin-bottom: 0.75rem; }
+    .res-title { font-size: 1.8rem; font-weight: 800; margin-bottom: 0.5rem; line-height: 1.25; }
+    .res-summary { color: var(--text-secondary); font-size: 1rem; margin-bottom: 1.5rem; line-height: 1.6; }
+
+    .meters-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1.25rem; background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem; margin-bottom: 1.75rem; }
+    .meter-box { display: flex; flex-direction: column; gap: 0.4rem; }
+    .meter-info { display: flex; justify-content: space-between; align-items: center; }
+    .meter-label { font-size: 0.85rem; font-weight: 700; color: var(--text-primary); }
+    .meter-val { font-size: 1.15rem; font-weight: 800; font-family: var(--font-mono); }
+    .progress-bar-bg { width: 100%; height: 12px; background: #1e293b; border-radius: var(--radius-full); overflow: hidden; border: 1px solid rgba(255,255,255,0.05); }
+    .progress-bar-fill { height: 100%; width: 0%; border-radius: var(--radius-full); transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.5s ease; }
+    .meter-status-note { font-size: 0.75rem; color: var(--text-muted); }
+
+    .insights-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.75rem; }
+    @media (max-width: 768px) { .insights-grid { grid-template-columns: 1fr; } }
+    .insight-card { background: rgba(30, 41, 59, 0.4); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem; display: flex; flex-direction: column; gap: 0.75rem; }
+    .insight-title { font-size: 1rem; font-weight: 700; display: flex; align-items: center; gap: 0.5rem; color: var(--text-primary); }
+    .insight-body { font-size: 0.9rem; color: #cbd5e1; line-height: 1.6; }
+    .quote-box { background: rgba(15, 23, 42, 0.8); border-left: 3px solid var(--accent-cyan); padding: 0.75rem 1rem; border-radius: 0 var(--radius-sm) var(--radius-sm) 0; font-size: 0.85rem; color: #e2e8f0; font-style: italic; }
+
+    .debate-box { background: linear-gradient(135deg, rgba(30, 41, 59, 0.8), rgba(15, 23, 42, 0.9)); border: 1px solid #38bdf8; border-radius: var(--radius-lg); padding: 1.5rem; margin-bottom: 1.75rem; box-shadow: 0 0 25px rgba(6, 182, 212, 0.12); }
+    .debate-header { display: flex; align-items: center; gap: 0.6rem; color: #38bdf8; font-size: 1.1rem; font-weight: 800; margin-bottom: 0.85rem; }
+    .debate-questions { list-style: none; display: flex; flex-direction: column; gap: 0.75rem; }
+    .question-item { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 0.9rem 1.1rem; font-size: 0.92rem; color: #f1f5f9; display: flex; gap: 0.6rem; align-items: flex-start; }
+    .q-num { background: rgba(56, 189, 248, 0.2); color: #38bdf8; font-size: 0.75rem; font-weight: 800; border-radius: var(--radius-full); width: 22px; height: 22px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 1px; }
+    .modern-cases { margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--border-subtle); font-size: 0.85rem; color: var(--text-secondary); display: flex; flex-direction: column; gap: 0.4rem; }
+    .case-pill-row { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.35rem; }
+    .case-pill { background: rgba(255, 255, 255, 0.06); border: 1px solid var(--border-subtle); padding: 0.3rem 0.6rem; border-radius: var(--radius-sm); font-size: 0.78rem; color: #cbd5e1; }
+    .case-pill strong { color: var(--accent-cyan); }
+
+    .resolution-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 1rem; margin-top: 1.5rem; }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.8); backdrop-filter: blur(8px); z-index: 200; display: none; align-items: center; justify-content: center; padding: 1rem; }
+    .modal-overlay.active { display: flex; animation: fadeIn 0.2s ease; }
+    .modal-content { background: var(--bg-panel); border: 1px solid var(--border-subtle); border-radius: var(--radius-lg); max-width: 860px; width: 100%; max-height: 90vh; overflow-y: auto; padding: 1.75rem; box-shadow: var(--shadow-lg); position: relative; }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.75rem; }
+    .modal-title { font-size: 1.3rem; font-weight: 800; color: var(--text-primary); display: flex; align-items: center; gap: 0.6rem; }
+    .close-modal { background: transparent; border: none; color: var(--text-muted); font-size: 1.5rem; cursor: pointer; line-height: 1; padding: 0.2rem 0.5rem; border-radius: var(--radius-sm); }
+    .close-modal:hover { color: var(--text-primary); background: var(--bg-card); }
+
+    .comp-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 0.5rem; }
+    .comp-table th, .comp-table td { padding: 0.8rem; border: 1px solid var(--border-subtle); text-align: left; vertical-align: top; }
+    .comp-table th { background: #0f172a; font-weight: 700; color: var(--text-primary); }
+    .comp-table td { color: #cbd5e1; }
+    .comp-table tr:nth-child(even) { background: rgba(30, 41, 59, 0.25); }
+    .col-opt-a { color: #f87171 !important; font-weight: 700; }
+    .col-opt-b { color: #fbbf24 !important; font-weight: 700; }
+    .col-opt-c { color: #34d399 !important; font-weight: 700; }
+
+    .app-footer { border-top: 1px solid var(--border-subtle); padding: 1.25rem 0; text-align: center; font-size: 0.8rem; color: var(--text-muted); margin-top: auto; }
+
+    /* Registro de decisiones en el cierre final */
+    .final-log { font-size: .88rem; color: var(--text-secondary); margin: 1rem 0 0; }
+    .final-log b { color: var(--text-primary); }
+  </style>
+</head>
+<body>
+
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="brand-group">
+        <div class="factory-icon" title="Planta Industrial SideroSur">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M2 20h20"></path>
+            <path d="M5 20V8l5 4V8l5 4V4h4v16"></path>
+          </svg>
+        </div>
+        <div class="brand-title">Turno Crítico <span class="brand-badge">SideroSur v3.0</span></div>
+      </div>
+      <div class="header-controls">
+        <button id="btnToggleAudio" class="btn btn-icon active" title="Sonido activado / desactivar" aria-label="Alternar audio">
+          <svg id="iconAudioOn" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+          </svg>
+          <svg id="iconAudioOff" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+            <line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line>
+          </svg>
+        </button>
+        <button id="btnOpenMatrix" class="btn btn-outline" title="Ver matriz comparativa de teorías" style="font-size:0.82rem; padding: 0.45rem 0.8rem;">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+          Matriz Teórica
+        </button>
+        <button id="btnResetApp" class="btn btn-icon" title="Reiniciar sesión de simulación" aria-label="Reiniciar simulación">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"></path></svg>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="container">
+
+    <!-- HUD persistente de las tres métricas acumuladas -->
+    <div id="turnHud" class="turn-hud">
+      <div class="h-item">
+        <div class="h-top"><span>Moral</span><span class="h-val" id="hudMoral">50</span></div>
+        <div class="h-bar"><div class="h-fill" id="hudMoralFill"></div></div>
+      </div>
+      <div class="h-item">
+        <div class="h-top"><span>Rendimiento</span><span class="h-val" id="hudProd">55</span></div>
+        <div class="h-bar"><div class="h-fill" id="hudProdFill"></div></div>
+      </div>
+      <div class="h-item">
+        <div class="h-top"><span>Calidad</span><span class="h-val" id="hudQuality">70</span></div>
+        <div class="h-bar"><div class="h-fill" id="hudQualityFill"></div></div>
+      </div>
+    </div>
+
+    <!-- Indicador de escena 1/4 .. 4/4 -->
+    <nav id="sceneProgress" class="scene-progress" style="display:none;">
+      <div class="scene-dot" data-scene="0">1</div>
+      <div class="scene-seg"></div>
+      <div class="scene-dot" data-scene="1">2</div>
+      <div class="scene-seg"></div>
+      <div class="scene-dot" data-scene="2">3</div>
+      <div class="scene-seg"></div>
+      <div class="scene-dot" data-scene="3">4</div>
+    </nav>
+
+    <!-- ==================================================================
+         PANTALLA 1: BRIEFING PROGRESIVO (solo en la escena 1)
+         ================================================================== -->
+    <section id="screenBriefing" class="screen active">
+
+      <nav class="flow-stepper" aria-label="Progreso del informe inicial">
+        <div id="stepDot1" class="step-item active" onclick="app.setBriefingStep(1)"><div class="step-circle">1</div><span>Telemetría de Crisis</span></div>
+        <div id="stepLine1" class="step-divider"></div>
+        <div id="stepDot2" class="step-item" onclick="app.setBriefingStep(2)"><div class="step-circle">2</div><span>Testimonios Clave</span></div>
+        <div id="stepLine2" class="step-divider"></div>
+        <div id="stepDot3" class="step-item" onclick="app.setBriefingStep(3)"><div class="step-circle">3</div><span>Misión de Planta</span></div>
+      </nav>
+
+      <div id="briefingStep1" class="briefing-step active">
+        <div class="hero-banner">
+          <div class="hero-badge-row">
+            <span class="hero-tag tag-role">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+              Rol: Gerente de Operaciones
+            </span>
+            <span class="hero-tag tag-crisis"><span class="pulse-dot"></span>Alerta Crítica: -25% Producción</span>
+            <span class="hero-tag tag-context">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              Turno Noche (22:00 - 06:00)
+            </span>
+          </div>
+          <h1 class="hero-title">Crisis en Línea #3: El Factor Humano</h1>
+          <p class="hero-desc">Acaba de asumir el mando técnico en SideroSur. Tras la abrupta renuncia de la jefatura previa, la línea neurálgica de ensamblado colapsó. El Directorio exige sanciones disciplinarias fulminantes, pero en el taller se respira un clima de descontento tácito y sabotaje velado. Cuatro decisiones sucesivas marcarán el destino de la planta: cada una deja huella en la siguiente.</p>
+          <div class="kpi-strip">
+            <div class="kpi-card danger">
+              <span class="kpi-label"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline><polyline points="17 18 23 18 23 12"></polyline></svg>Rendimiento Actual</span>
+              <span class="kpi-value danger"><span id="kpiProdNum">75</span>%<span style="font-size:0.95rem; font-weight:600; color:#f87171;">(-25% desplome)</span></span>
+              <span class="kpi-sub">Estándar nominal exigido: 100% de tonelaje programado</span>
+            </div>
+            <div class="kpi-card warning">
+              <span class="kpi-label"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>Piezas Rechazadas</span>
+              <span class="kpi-value warning"><span id="kpiScrapNum">18.4</span>%<span style="font-size:0.95rem; font-weight:600; color:#fbbf24;">(Alarma Calidad)</span></span>
+              <span class="kpi-sub">Tolerancia máxima admisible de planta: 2.0%</span>
+            </div>
+            <div class="kpi-card info">
+              <span class="kpi-label"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>Estado Psicosocial</span>
+              <span class="kpi-value info" style="font-size:1.45rem;">Resistencia Pasiva</span>
+              <span class="kpi-sub">Soldiering sistemático y quiebre de la confianza mutua</span>
+            </div>
+          </div>
+          <div style="margin-top: 2rem; display: flex; justify-content: flex-end;">
+            <button class="btn btn-primary btn-large btn-glow-pulse" onclick="app.setBriefingStep(2)">
+              <span>Iniciar Investigación de Planta</span>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div id="briefingStep2" class="briefing-step">
+        <div class="dialogue-section">
+          <div class="section-header">
+            <div class="section-title"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent-cyan)"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>Sala de Testimonios y Diagnóstico In Situ</div>
+            <div class="dialogue-tabs">
+              <button id="tabCarlos" class="d-tab active" onclick="app.switchDialogue('carlos')">👷 Don Carlos (Tornero Líder)</button>
+              <button id="tabMendoza" class="d-tab" onclick="app.switchDialogue('mendoza')">💼 Dra. Mendoza (Directorio)</button>
+            </div>
+          </div>
+
+          <div id="viewCarlos" class="dialogue-view active">
+            <div class="dialogue-box">
+              <div class="avatar-wrapper"><div class="avatar-img avatar-carlos">👷‍♂️</div><div class="avatar-name">Don Carlos</div><div class="avatar-role">Tornero Líder & Delegado Informal (28 años en planta)</div></div>
+              <div class="bubble-wrapper">
+                <div class="dialogue-bubble">"<span id="textCarlos" class="dialogue-text">Mire, ingeniero... la gente acá no es floja ni las máquinas están malas. La administración anterior desarmó los turnos de toda la vida sin consultar a nadie. Separaron a compadres que llevaban 15 años calibrando juntos a puro oído y nos pusieron a competir con gente que no conocemos. La moral está en el piso. Si nos tratan como tuercas oxidadas sustituibles, las tuercas crujen y la línea se frena.</span><span id="cursorCarlos" class="typing-cursor"></span>"</div>
+                <div class="typewriter-ctrl"><button class="btn-skip-typing" onclick="app.skipTyping('carlos')">Completar texto</button></div>
+                <div class="dialogue-meta"><span class="intel-badge">HALLAZGO SOCIOTÉCNICO</span><span class="dialogue-summary">La organización informal fue fracturada; surge el fenómeno de <em>soldiering</em> o restricción deliberada del ritmo laboral.</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div id="viewMendoza" class="dialogue-view">
+            <div class="dialogue-box">
+              <div class="avatar-wrapper"><div class="avatar-img avatar-mendoza">👩‍💼</div><div class="avatar-name">Dra. Mendoza</div><div class="avatar-role">Directora Ejecutiva Corporativa (Representante del Board)</div></div>
+              <div class="bubble-wrapper">
+                <div class="dialogue-bubble">"<span id="textMendoza" class="dialogue-text">Ingeniero, los accionistas no toleran sentimentalismos de taller. Los números no mienten: llevamos tres semanas con 25% menos de despachos y clientes de exportación cancelando contratos. Necesito mano dura y disciplina inmediata: sanciones ejemplares, cámaras en cada celda de trabajo o despidos fulminantes. Si usted no endereza el turno hoy, su cargo estará en evaluación mañana.</span><span id="cursorMendoza" class="typing-cursor" style="display:none;"></span>"</div>
+                <div class="typewriter-ctrl"><button class="btn-skip-typing" onclick="app.skipTyping('mendoza')">Completar texto</button></div>
+                <div class="dialogue-meta"><span class="intel-badge" style="border-color:#ef4444; color:#f87171;">PRESIÓN JERÁRQUICA</span><span class="dialogue-summary">El Directorio exige resultados inmediatos apoyándose en el paradigma del control externo y la sanción punitiva.</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="dialogue-footer-nav">
+            <button class="btn btn-outline" onclick="app.setBriefingStep(1)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg><span>Volver a Telemetría</span></button>
+            <div style="display: flex; gap: 0.75rem; flex-wrap: wrap;">
+              <button id="btnNextTestimony" class="btn btn-outline" onclick="app.toggleTestimony()"><span>Ver Testimonio de Dra. Mendoza</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg></button>
+              <button class="btn btn-primary btn-glow-pulse" onclick="app.setBriefingStep(3)"><span>Proceder a la Misión</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="briefingStep3" class="briefing-step">
+        <div class="hero-banner" style="border-left-color: #38bdf8;">
+          <div class="hero-badge-row"><span class="hero-tag tag-role">Objetivo de la Simulación</span><span class="hero-tag tag-context">Toma de Decisión Crítica</span></div>
+          <h2 class="hero-title" style="font-size: 1.85rem;">La Decisión está en sus Manos</h2>
+          <p class="hero-desc">Ha escuchado la voz del taller (Don Carlos) y el ultimátum corporativo (Dra. Mendoza). A lo largo de cuatro frentes sucesivos deberá emitir directrices que marcarán el destino del turno nocturno. Cada modelo administrativo desencadenará reacciones psicosociales reales, y lo que decida en un frente cambiará el punto de partida del siguiente.</p>
+          <div style="background: rgba(15, 23, 42, 0.7); border: 1px solid var(--border-subtle); border-radius: var(--radius-md); padding: 1.25rem 1.5rem; margin-bottom: 2rem;">
+            <div style="font-weight: 700; color: var(--accent-cyan); font-size: 0.95rem; margin-bottom: 0.5rem; display: flex; align-items: center; gap: 0.5rem;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+              Instrucciones Operativas:
+            </div>
+            <ul style="list-style: disc; padding-left: 1.25rem; color: #cbd5e1; font-size: 0.9rem; line-height: 1.7;">
+              <li>Cuatro frentes: la caída de productividad, el líder informal, la reunión con el equipo y la presión final de la dirección.</li>
+              <li>Tres indicadores viajan con usted de un frente a otro: <strong>moral del equipo</strong>, <strong>rendimiento</strong> y <strong>calidad</strong>.</li>
+              <li>Cada decisión ajusta esos indicadores y cambia cómo se presenta el siguiente frente.</li>
+            </ul>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+            <button class="btn btn-outline" onclick="app.setBriefingStep(2)"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg><span>Revisar Testimonios</span></button>
+            <button id="btnGoToConsole" class="btn btn-primary btn-large btn-glow-pulse" onclick="app.goToConsole()"><span>Entrar a la Consola de Decisión</span><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         PANTALLA 2: CONSOLA DE DECISIÓN (se reutiliza en las 4 escenas)
+         ================================================================== -->
+    <section id="screenConsole" class="screen">
+      <div class="console-header">
+        <div class="hero-badge-row" style="justify-content: center;">
+          <span class="hero-tag tag-role" id="consoleEyebrow">Panel de Comando Operativo</span>
+          <span class="hero-tag tag-crisis" id="consoleBadge">Turno de Noche Iniciando</span>
+        </div>
+        <h2 class="console-title" id="consoleTitle">¿Qué directriz de gestión implementará?</h2>
+        <p class="console-subtitle" id="consoleSubtitle">Evalúe el impacto en la moral del grupo, la productividad y la estabilidad de la planta a mediano plazo.</p>
+      </div>
+
+      <div id="consoleContext" style="margin-bottom:1.5rem;"></div>
+
+      <div class="cards-grid" id="cardsGrid"><!-- 3 tarjetas inyectadas por JS --></div>
+
+      <div style="text-align: center; margin-top: 1.5rem;">
+        <button class="btn btn-outline" id="btnBackToBriefing" onclick="app.goToBriefing()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          Volver a revisar las entrevistas previas
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         PANTALLA 3: RESOLUCIÓN DE CADA ESCENA
+         ================================================================== -->
+    <section id="screenResolution" class="screen">
+      <div class="resolution-banner">
+        <div class="resolution-badge-row">
+          <span id="resBadgeDec" class="hero-tag">Decisión Seleccionada</span>
+          <span id="resBadgeTheory" class="hero-tag tag-role">Escuela Teórica</span>
+        </div>
+        <h2 id="resTitle" class="res-title">Resultado de la Operación</h2>
+        <p id="resSummary" class="res-summary">Crónica de los eventos ocurridos en la planta.</p>
+
+        <div class="meters-grid">
+          <div class="meter-box">
+            <div class="meter-info"><span class="meter-label">Moral y Clima del Equipo</span><span id="valMoral" class="meter-val">0%</span></div>
+            <div class="progress-bar-bg"><div id="barMoral" class="progress-bar-fill"></div></div>
+            <span id="statusMoral" class="meter-status-note">Evaluando...</span>
+          </div>
+          <div class="meter-box">
+            <div class="meter-info"><span class="meter-label">Rendimiento Productivo</span><span id="valProd" class="meter-val">0%</span></div>
+            <div class="progress-bar-bg"><div id="barProd" class="progress-bar-fill"></div></div>
+            <span id="statusProd" class="meter-status-note">Evaluando...</span>
+          </div>
+          <div class="meter-box">
+            <div class="meter-info"><span class="meter-label">Tasa de Piezas Conformes</span><span id="valQuality" class="meter-val">0%</span></div>
+            <div class="progress-bar-bg"><div id="barQuality" class="progress-bar-fill"></div></div>
+            <span id="statusQuality" class="meter-status-note">Evaluando...</span>
+          </div>
+        </div>
+
+        <div class="insights-grid">
+          <div class="insight-card">
+            <div class="insight-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent-cyan);"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>Dinámica Psicosocial en Planta</div>
+            <div id="resSocialDynamic" class="insight-body">Detalle del comportamiento observado en la línea de montaje.</div>
+            <div class="quote-box" id="resQuoteBlock">"Cita del protagonista."</div>
+          </div>
+          <div class="insight-card">
+            <div class="insight-title"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:#fbbf24;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>Marco Teórico y Fundamentos</div>
+            <div id="resTheoryBody" class="insight-body">Explicación epistemológica del fenómeno según la teoría organizacional.</div>
+          </div>
+        </div>
+
+        <div class="debate-box">
+          <div class="debate-header"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>Cuestiones para el Plenario y Debate en el Aula</div>
+          <ul class="debate-questions" id="debateQuestionsList"></ul>
+          <div class="modern-cases"><div><strong>Casos Reales y Prácticas Contemporáneas de la Industria:</strong></div><div class="case-pill-row" id="casePillsRow"></div></div>
+        </div>
+
+        <div class="resolution-actions" id="resolutionActions">
+          <!-- Botones inyectados por JS: continuar a la siguiente escena, o cerrar turno -->
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================================================================
+         PANTALLA 4: CIERRE DE TURNO (tras la escena 4)
+         ================================================================== -->
+    <section id="screenFinal" class="screen">
+      <div class="resolution-banner">
+        <div class="resolution-badge-row"><span class="hero-tag tag-role">Cierre de Turno</span></div>
+        <h2 id="finTitle" class="res-title">¿Qué ocurrió en la planta?</h2>
+        <p id="finText" class="res-summary"></p>
+
+        <div class="meters-grid">
+          <div class="meter-box">
+            <div class="meter-info"><span class="meter-label">Moral del Equipo</span><span id="finValMoral" class="meter-val">0%</span></div>
+            <div class="progress-bar-bg"><div id="finBarMoral" class="progress-bar-fill"></div></div>
+          </div>
+          <div class="meter-box">
+            <div class="meter-info"><span class="meter-label">Rendimiento Operativo</span><span id="finValProd" class="meter-val">0%</span></div>
+            <div class="progress-bar-bg"><div id="finBarProd" class="progress-bar-fill"></div></div>
+          </div>
+          <div class="meter-box">
+            <div class="meter-info"><span class="meter-label">Piezas Conformes</span><span id="finValQuality" class="meter-val">0%</span></div>
+            <div class="progress-bar-bg"><div id="finBarQuality" class="progress-bar-fill"></div></div>
+          </div>
+        </div>
+
+        <div class="final-log" id="finalLog"></div>
+
+        <div class="debate-box" style="margin-top:1.5rem;">
+          <div class="debate-header">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            Para el cierre de la exposición
+          </div>
+          <p class="insight-body">Las decisiones administrativas no afectaron únicamente los resultados operativos: también modificaron la motivación, la comunicación, la dinámica de grupo y la relación entre los trabajadores y sus líderes. Como gerente, ¿qué aprendió sobre la relación entre las personas y la productividad?</p>
+        </div>
+
+        <div class="resolution-actions">
+          <button class="btn btn-primary btn-large" onclick="app.openModal()">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>
+            Ver Comparativa de las 3 Escuelas
+          </button>
+          <button class="btn btn-outline btn-large" onclick="app.resetSimulation()">Jugar otro turno</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <div id="modalMatrix" class="modal-overlay" onclick="if(event.target===this) app.closeModal();">
+    <div class="modal-content">
+      <div class="modal-head">
+        <h3 class="modal-title"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--accent-cyan);"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>Matriz Comparativa de Modelos Organizacionales</h3>
+        <button class="close-modal" onclick="app.closeModal()" aria-label="Cerrar modal">&times;</button>
+      </div>
+      <div style="overflow-x: auto;">
+        <table class="comp-table">
+          <thead><tr><th style="width:20%;">Dimensión</th><th class="col-opt-a" style="width:26%;">Opción A: Coercitiva (Taylorismo)</th><th class="col-opt-b" style="width:27%;">Opción B: Bono Individual (Homo Economicus)</th><th class="col-opt-c" style="width:27%;">Opción C: Democrática (Relaciones Humanas)</th></tr></thead>
+          <tbody>
+            <tr><td><strong>Concepción del Trabajador</strong></td><td>Engranaje sustituible y perezoso por naturaleza que necesita supervisión externa estricta.</td><td>Agente egoísta y aislado, motivado únicamente por maximizar su ganancia monetaria directa.</td><td>Ser social con necesidades afectivas, normas grupales y búsqueda de sentido de pertenencia.</td></tr>
+            <tr><td><strong>Mecanismo de Control</strong></td><td>Vigilancia panóptica (cámaras), cronómetro forzoso, descuentos y sanciones directas.</td><td>Tablero público de rendimiento, ranking individual y canibalismo competitivo.</td><td>Autorregulación colectiva, normas informales de grupo y corresponsabilidad fraternal.</td></tr>
+            <tr><td><strong>Respuesta del Grupo</strong></td><td><strong>Soldiering Sistemático:</strong> Sabotajes en micrómetros, micro-huelgas y ausentismo récord.</td><td><strong>Destrucción de Cooperación:</strong> Acaparamiento de herramientas y ocultamiento de fallas.</td><td><strong>Efecto Hawthorne Positivo:</strong> Orgullo de cuadrilla, autoayuda en cuello de botella y calidad récord.</td></tr>
+            <tr><td><strong>Sostenibilidad Temporal</strong></td><td>Inviable; rotación forzada y pérdida de conocimiento tácito de calibración.</td><td>Colapso por tasa inaceptable de reprocesos y desintegración del clima laboral.</td><td>Alta sostenibilidad y mejora continua (Kaizen orgánico nacido desde las bases).</td></tr>
+            <tr><td><strong>Referencia Doctrinal</strong></td><td>Frederick W. Taylor (Shop Management, 1903).</td><td>Escuela Clásica / Marginalismo utilitarista.</td><td>Elton Mayo, Fritz Roethlisberger (Western Electric Hawthorne Studies, 1927-1932).</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div style="margin-top: 1.5rem; text-align: right;"><button class="btn btn-primary" onclick="app.closeModal()">Entendido</button></div>
+    </div>
+  </div>
+
+  <footer class="app-footer">
+    <div class="container" style="padding-bottom:0;">Turno Crítico: El Factor Humano &bull; Plataforma Pedagógica Interactiva para Gestión y Teoría de las Organizaciones &bull; Arquitectura Offline Pura</div>
+  </footer>
+
+  <script>
+    /* ======================= AUDIO SINTETIZADO ======================= */
+    class SoundFX {
+      constructor() { this.ctx = null; this.muted = false; }
+      init() {
+        if (!this.ctx) {
+          const AC = window.AudioContext || window.webkitAudioContext;
+          if (AC) this.ctx = new AC();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') this.ctx.resume();
+      }
+      playClick() {
+        if (this.muted) return;
+        try { this.init(); if (!this.ctx) return;
+          const now = this.ctx.currentTime, osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+          osc.type = 'triangle'; osc.frequency.setValueAtTime(800, now); osc.frequency.exponentialRampToValueAtTime(180, now + 0.04);
+          gain.gain.setValueAtTime(0.2, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.04);
+          osc.connect(gain); gain.connect(this.ctx.destination); osc.start(now); osc.stop(now + 0.045);
+        } catch (e) {}
+      }
+      playTyping() {
+        if (this.muted) return;
+        try { this.init(); if (!this.ctx) return;
+          const now = this.ctx.currentTime, osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+          osc.type = 'sine'; const freq = 1100 + (Math.random() * 300 - 150); osc.frequency.setValueAtTime(freq, now);
+          gain.gain.setValueAtTime(0.025, now); gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.02);
+          osc.connect(gain); gain.connect(this.ctx.destination); osc.start(now); osc.stop(now + 0.025);
+        } catch (e) {}
+      }
+      playWhoosh() {
+        if (this.muted) return;
+        try { this.init(); if (!this.ctx) return;
+          const now = this.ctx.currentTime, osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+          osc.type = 'sine'; osc.frequency.setValueAtTime(260, now); osc.frequency.exponentialRampToValueAtTime(540, now + 0.12);
+          gain.gain.setValueAtTime(0.08, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+          osc.connect(gain); gain.connect(this.ctx.destination); osc.start(now); osc.stop(now + 0.16);
+        } catch (e) {}
+      }
+      playAlarmA() {
+        if (this.muted) return;
+        try { this.init(); if (!this.ctx) return; const now = this.ctx.currentTime;
+          [440, 466.16].forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator(), gain = this.ctx.createGain();
+            osc.type = 'sawtooth'; osc.frequency.setValueAtTime(freq, now); osc.frequency.exponentialRampToValueAtTime(freq * 0.7, now + 0.35);
+            gain.gain.setValueAtTime(0.18, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.38);
+            osc.connect(gain); gain.connect(this.ctx.destination); osc.start(now + idx * 0.02); osc.stop(now + 0.4);
+          });
+        } catch (e) {}
+      }
+      playCoinB() {
+        if (this.muted) return;
+        try { this.init(); if (!this.ctx) return; const now = this.ctx.currentTime;
+          [659.25, 987.77, 1318.51].forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator(), gain = this.ctx.createGain(), t0 = now + idx * 0.07;
+            osc.type = 'sine'; osc.frequency.setValueAtTime(freq, t0);
+            gain.gain.setValueAtTime(0.18, t0); gain.gain.exponentialRampToValueAtTime(0.001, t0 + 0.16);
+            osc.connect(gain); gain.connect(this.ctx.destination); osc.start(t0); osc.stop(t0 + 0.17);
+          });
+        } catch (e) {}
+      }
+      playHarmonyC() {
+        if (this.muted) return;
+        try { this.init(); if (!this.ctx) return; const now = this.ctx.currentTime;
+          [261.63, 329.63, 392.00, 523.25].forEach((freq, idx) => {
+            const osc = this.ctx.createOscillator(), gain = this.ctx.createGain(), t0 = now + idx * 0.05;
+            osc.type = 'sine'; osc.frequency.setValueAtTime(freq, t0);
+            gain.gain.setValueAtTime(0.001, t0); gain.gain.linearRampToValueAtTime(0.15, t0 + 0.08); gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.7);
+            osc.connect(gain); gain.connect(this.ctx.destination); osc.start(t0); osc.stop(t0 + 0.75);
+          });
+        } catch (e) {}
+      }
+    }
+
+    /* ======================= DIÁLOGOS DEL BRIEFING ======================= */
+    const DIALOGUES = {
+      carlos: {
+        text: 'Mire, ingeniero... la gente acá no es floja ni las máquinas están malas. La administración anterior desarmó los turnos de toda la vida sin consultar a nadie. Separaron a compadres que llevaban 15 años calibrando juntos a puro oído y nos pusieron a competir con gente que no conocemos. La moral está en el piso. Si nos tratan como tuercas oxidadas sustituibles, las tuercas crujen y la línea se frena.'
+      },
+      mendoza: {
+        text: 'Ingeniero, los accionistas no toleran sentimentalismos de taller. Los números no mienten: llevamos tres semanas con 25% menos de despachos y clientes de exportación cancelando contratos. Necesito mano dura y disciplina inmediata: sanciones ejemplares, cámaras en cada celda de trabajo o despidos fulminantes. Si usted no endereza el turno hoy, su cargo estará en evaluación mañana.'
+      }
+    };
+
+    /* ======================= LAS 4 ESCENAS RAMIFICADAS =======================
+       Cada escena tiene: eyebrow, badge, title, subtitle, contexto (texto de
+       continuidad según la decisión anterior) y 3 opciones A/B/C.
+       Cada opción trae deltas (no valores absolutos) para moral/prod/quality,
+       así el estado se acumula de escena en escena, y su propio bloque de
+       resolución (título, resumen, dinámica social, cita, teoría, preguntas,
+       casos, sonido). */
+    const ESCENAS = [
+    { // ESCENA 1
+      eyebrow: 'Frente 1 de 4', badge: 'Turno de Noche Iniciando',
+      title: '¿Qué directriz de gestión implementará?',
+      subtitle: 'La caída de productividad exige una respuesta inmediata.',
+      contexto: null,
+      opciones: {
+        A: { tag:'Opción A', theory:'Taylorismo Clásico', letter:'card-a', btnClass:'btn-a',
+          cardTitle:'Supervisión Coercitiva y Vigilancia',
+          quote:'"El orden se impone con control estricto de tiempos y cero tolerancia a la indisciplina."',
+          measures:['📹 Instalación de cámaras de monitoreo 360° en las celdas de maquinado.','⏱️ Prohibición estricta de charlas informales y pausas grupales.','📋 Descuentos salariales por cada micro-parada mayor a 90 segundos.'],
+          btnLabel:'Ejecutar Medidas Coercitivas', sound:'playAlarmA',
+          d:{moral:-16, prod:6, quality:-10},
+          badgeClass:'tag-crisis', theoryName:'Escuela de la Administración Científica (Taylorismo)',
+          title:'Resistencia Pasiva y Parálisis Mecánica',
+          summary:'La instalación de cámaras y las multas salariales desataron una respuesta subterránea inmediata.',
+          social:'Durante la primera semana los operarios obedecieron al pie de la letra, pero con lentitud deliberada. El tiempo de parada técnica se cuadruplicó y aparecieron limaduras en los engranajes principales.',
+          quoteRes:'Don Carlos: "Si nos vigila con cámaras como a delincuentes, le daremos exactamente lo que pidió: cero iniciativas, cero solidaridad."',
+          theoryBody:'Taylor concibió al obrero como un ente pasivo que solo responde al castigo. Cuando la administración ignora los códigos informales del grupo, aparece el <em>soldiering</em>: restricción deliberada de producción.',
+          questions:['¿Por qué las cámaras generaron más fallas técnicas en lugar de menos?','¿Qué diferencia hay entre cumplir un protocolo y comprometerse con la calidad?'],
+          cases:['<strong>Midvale Steel (1881):</strong> conflictos y rotura de herramientas por presión de cronómetro.','<strong>Sabotaje en almacenes automatizados</strong> contemporáneos bajo vigilancia panóptica.'] },
+        B: { tag:'Opción B', theory:'Dogma Homo Economicus', letter:'card-b', btnClass:'btn-b',
+          cardTitle:'Incentivo Financiero Individual',
+          quote:'"Cada operario responderá si premiamos el bolsillo del más productivo."',
+          measures:['💰 Bono económico del 30% individual para el operario con mayor tonelaje.','📊 Pantalla LED pública en el taller con ranking en vivo de velocidad.','⚔️ Estimulación explícita de rivalidad competitiva entre cuadrillas.'],
+          btnLabel:'Lanzar Competencia Individual', sound:'playCoinB',
+          d:{moral:-6, prod:12, quality:-14},
+          badgeClass:'tag-context', theoryName:'Doctrina Neoclásica del Homo Economicus',
+          title:'Canibalismo Laboral en la Línea',
+          summary:'El bono al operario más veloz generó un repunte efímero, pero rápidamente detonó la guerra interna.',
+          social:'Los operarios más jóvenes aceleraron las máquinas omitiendo fases de enfriamiento para liderar el ranking. Los compañeros de la estación siguiente empezaron a recibir piezas defectuosas.',
+          quoteRes:'Dra. Mendoza: "¿Por qué el 46% de los chasis se están rajando en las pruebas hidráulicas si les pagamos más que nunca?"',
+          theoryBody:'El <em>Homo Economicus</em> asume que el trabajador es una calculadora egoísta aislada. En tareas interdependientes, incentivar solo el rendimiento individual premia el descuido de lo común.',
+          questions:['¿Por qué un incentivo individual puede destruir un proceso que requiere ensamblaje en cadena?','¿Cómo reacciona un grupo frente a quien rompe el ritmo colectivo por un bono?'],
+          cases:['<strong>Bank Wiring Room (Hawthorne, 1931):</strong> sanción social a quienes producían de más o de menos.','<strong>Enron Rank-and-Yank:</strong> despido del 15% inferior que desató sabotaje generalizado.'] },
+        C: { tag:'Opción C', theory:'Relaciones Humanas (Mayo)', letter:'card-c', btnClass:'btn-c',
+          cardTitle:'Investigación y Diálogo Directo',
+          quote:'"Antes de sancionar, hay que entender qué está pasando realmente en el taller."',
+          measures:['🎙️ Bajar al piso y reunir testimonios directos de los operarios.','📓 Registrar los hallazgos antes de proponer cualquier medida.','🤝 Suspender temporalmente las sanciones mientras se investiga.'],
+          btnLabel:'Investigar antes de Decidir', sound:'playHarmonyC',
+          d:{moral:10, prod:4, quality:6},
+          badgeClass:'tag-role', theoryName:'Comunicación y Comportamiento del Grupo',
+          title:'Lo que Nadie Había Preguntado',
+          summary:'Bajar al taller reveló que el problema no era de capacidad técnica sino de vínculo social roto.',
+          social:'Un soldador con 22 años en la planta cuenta que la gerencia anterior repartió en tres horarios distintos al grupo que llevaba una década trabajando junto, calibrando a puro oído.',
+          quoteRes:'Don Carlos: "Gracias por preguntar antes de castigar. Eso ya dice algo distinto de usted."',
+          theoryBody:'Entender la causa social de una caída de productividad cuesta un turno; corregir una medida punitiva mal dirigida cuesta meses de clima laboral.',
+          questions:['¿Qué se pierde cuando la dirección sanciona antes de investigar?','¿Cómo distinguir un problema de capacidad de uno de vínculo social?'],
+          cases:['<strong>Hawthorne (1924-1932):</strong> las entrevistas al personal revelaron más que cualquier cambio físico en la planta.'] }
+      }
+    },
+    { // ESCENA 2
+      eyebrow: 'Frente 2 de 4', badge: 'Diagnóstico en Curso',
+      title: 'El líder informal: ¿qué hace con Don Carlos?',
+      subtitle: 'Sus compañeros lo consultan antes de aceptar cualquier cambio, aunque no tiene cargo de mando.',
+      contextos: {
+        A: 'Cuando pregunta por el nombre que todos mencionan, el taller se cierra. Carlos accede a hablar de pie, sin sentarse, y mide cada palabra.',
+        B: 'Carlos fue el primero en rechazar el bono: "Ese premio lo puso alguien que no sabe cómo se arma una línea", dijo, y el grupo le dio la razón.',
+        C: 'El nombre salió en casi todas las conversaciones. Carlos ya sabe que usted bajó a preguntar, y eso le compró la reunión.'
+      },
+      opciones: {
+        A: { tag:'Opción A', theory:'Autoridad Formal Exclusiva', letter:'card-a', btnClass:'btn-a',
+          cardTitle:'Ignorar su Influencia',
+          quote:'"La estructura formal manda; Carlos no tiene ningún cargo y no debería intervenir en las decisiones."',
+          measures:['🚫 Mantener la conducción exclusivamente en el supervisor formal.','📎 No invitar a Carlos a ninguna reunión de gestión.','🔒 Tratar cualquier consulta informal como fuera de protocolo.'],
+          btnLabel:'Mantener la Estructura Formal', sound:'playAlarmA',
+          d:{moral:-12, prod:-4, quality:-4},
+          badgeClass:'tag-crisis', theoryName:'Autoridad Formal Exclusiva',
+          title:'El Canal se Cierra',
+          summary:'Las instrucciones siguen bajando por el organigrama y dejan de subir respuestas.',
+          social:'Lo que antes se resolvía en dos minutos en el taller ahora llega a la oficina tarde, o no llega. Carlos deja de mediar en los pequeños conflictos de turno.',
+          quoteRes:'Don Carlos: "Si aquí solo manda el papel, el papel se las va a arreglar solo cuando algo se trabe."',
+          theoryBody:'Ignorar la organización informal no la elimina: la deja operando fuera de su alcance. La influencia sigue ahí, solo que ya no la puede ver ni usar a su favor.',
+          questions:['¿Qué riesgo corre una gerencia que no reconoce a sus líderes informales?','¿Puede la autoridad formal funcionar sin el respaldo de la autoridad informal?'],
+          cases:['<strong>Organización informal vs. formal:</strong> Roethlisberger documentó cómo ambas coexisten en toda planta industrial.'] },
+        B: { tag:'Opción B', theory:'Conversión de Influencia', letter:'card-b', btnClass:'btn-b',
+          cardTitle:'Nombrarlo Supervisor de Inmediato',
+          quote:'"Si tiene tanta influencia, démosle el cargo formal y que la ejerza desde ahí."',
+          measures:['📋 Formalizar a Carlos como supervisor del turno.','🪑 Darle autoridad directa sobre el resto del equipo.','⚡ Aplicar el cambio sin preparar antes al grupo.'],
+          btnLabel:'Ascenderlo de Inmediato', sound:'playCoinB',
+          d:{moral:-2, prod:6, quality:2},
+          badgeClass:'tag-context', theoryName:'Conversión de Influencia Informal en Autoridad Formal',
+          title:'Ascenso con Efecto Secundario',
+          summary:'Carlos acepta el cargo. Parte del grupo lo celebra; otra parte empieza a verlo como "de los de arriba".',
+          social:'Los compañeros que antes le contaban todo ahora miden lo que dicen frente a él. Su influencia real para calmar tensiones baja justo cuando más se necesita.',
+          quoteRes:'Un operario, en voz baja: "Carlos ahora firma las sanciones; ya no es de los nuestros."',
+          theoryBody:'La influencia informal nace de pertenecer al grupo, no de un título. Formalizarla sin preparar al equipo puede consumir exactamente lo que la hacía valiosa.',
+          questions:['¿Por qué un ascenso puede debilitar la influencia real de un líder informal?','¿Cómo prepararía este cambio para que no se pierda la confianza del grupo?'],
+          cases:['<strong>Peter Principle aplicado a liderazgo informal:</strong> el ascenso cambia la posición pero no siempre preserva la confianza previa.'] },
+        C: { tag:'Opción C', theory:'Reconocimiento de la Organización Informal', letter:'card-c', btnClass:'btn-c',
+          cardTitle:'Integrarlo al Proceso',
+          quote:'"El compromiso nace de reconocer a quien el grupo ya eligió como su voz."',
+          measures:['🤝 Invitar a Carlos a las reuniones de gestión sin cambiar su cargo formal.','👂 Usarlo como canal para conocer la percepción real del taller.','🎯 Coordinar con él —no a través de él— las decisiones que afectan al grupo.'],
+          btnLabel:'Integrarlo sin Formalizar', sound:'playHarmonyC',
+          d:{moral:14, prod:6, quality:4},
+          badgeClass:'tag-role', theoryName:'Reconocimiento de la Organización Informal',
+          title:'Un Puente que ya Existía',
+          summary:'Carlos llega desconfiado a la primera reunión y se va con tareas concretas.',
+          social:'Lo que se acuerda en la oficina llega al piso el mismo día, explicado por alguien a quien el grupo le cree. La brecha entre lo que se decide y lo que se entiende se cierra.',
+          quoteRes:'Don Carlos: "Así sí. Nadie me quitó nada y ahora la gente sabe que hablamos antes de decidir."',
+          theoryBody:'El líder informal no compite con la autoridad formal: transporta información y confianza que la estructura por sí sola no alcanza a mover.',
+          questions:['¿Qué diferencia hay entre integrar a un líder informal y formalizarlo?','¿Qué se gana al usar el canal informal para escuchar antes de decidir?'],
+          cases:['<strong>Modelo de doble canal:</strong> empresas que sostienen comités formales y consejos informales en paralelo.'] }
+      }
+    },
+    { // ESCENA 3
+      eyebrow: 'Frente 3 de 4', badge: 'Reunión Convocada',
+      title: 'La reunión con los trabajadores',
+      subtitle: 'Tres reclamos aparecen en los primeros minutos: los turnos, la falta de consulta, la pérdida del equipo.',
+      contextos: {
+        A: 'La convocatoria llega por el supervisor formal y la sala se llena a medias. Los que vienen se sientan atrás y esperan a ver qué anuncia usted.',
+        B: 'Carlos está en la sala, del lado del equipo. Viene el turno casi completo y la conversación arranca sin que tenga que empujarla.',
+        C: 'Carlos ya coordinó con usted antes de la reunión. El grupo llega sabiendo que esta vez sí se va a discutir algo, no solo a escuchar un anuncio.'
+      },
+      opciones: {
+        A: { tag:'Opción A', theory:'Rapidez y Autoridad Administrativa', letter:'card-a', btnClass:'btn-a',
+          cardTitle:'Presentar una Solución ya Decidida',
+          quote:'"Se comunican las medidas y se explica que deben cumplirse, sin abrir a discusión."',
+          measures:['📢 Anunciar los nuevos turnos como decisión cerrada.','⏳ Limitar la reunión a diez minutos de comunicado.','🚪 No abrir espacio para preguntas o contrapropuestas.'],
+          btnLabel:'Comunicar la Decisión', sound:'playAlarmA',
+          d:{moral:-15, prod:5, quality:-2},
+          badgeClass:'tag-crisis', theoryName:'Rapidez y Autoridad Administrativa',
+          title:'Reunión de Diez Minutos',
+          summary:'Usted sale rápido y con una decisión tomada. El equipo sale con la confirmación de que hablar no sirve.',
+          social:'La próxima vez que algo falle en la línea, nadie se lo va a decir a tiempo. El silencio se instala como estrategia de protección del grupo.',
+          quoteRes:'Un operario, saliendo de la sala: "Para esto no hacía falta juntarnos."',
+          theoryBody:'Una reunión donde no se escucha enseña a callar. La velocidad de hoy se paga con la información que dejará de llegar mañana.',
+          questions:['¿Qué aprende un equipo cuando una reunión no deja espacio para hablar?','¿Qué se gana en tiempo y qué se pierde en confianza?'],
+          cases:['<strong>Comunicación descendente pura:</strong> estudios muestran su correlación con mayor rotación y menor reporte de incidentes.'] },
+        B: { tag:'Opción B', theory:'Participación y Necesidades Sociales', letter:'card-b', btnClass:'btn-b',
+          cardTitle:'Escuchar sus Propuestas',
+          quote:'"Se deja que expliquen los problemas y propongan soluciones antes de decidir nada."',
+          measures:['👂 Abrir la reunión con los reclamos del equipo, sin interrumpir.','📝 Registrar las propuestas de horario que surjan del grupo.','✅ Decidir usando lo que el equipo puso sobre la mesa.'],
+          btnLabel:'Abrir el Espacio de Escucha', sound:'playHarmonyC',
+          d:{moral:16, prod:8, quality:8},
+          badgeClass:'tag-role', theoryName:'Participación y Necesidades Sociales',
+          title:'Tres Horas Bien Gastadas',
+          summary:'La reunión empieza con reclamos viejos y termina con propuestas concretas de horario que nadie en la oficina había imaginado.',
+          social:'Usted decide al final, pero con lo que ellos pusieron sobre la mesa. El equipo sale sintiendo que la decisión también es, en parte, suya.',
+          quoteRes:'Don Carlos: "Primera vez que salimos de una reunión con algo escrito que nosotros propusimos."',
+          theoryBody:'Ser escuchado cambia el rendimiento incluso antes de que cambie la norma. El reconocimiento es una condición de trabajo, no un gesto simbólico.',
+          questions:['¿Por qué la participación mejora el compromiso incluso antes de ver resultados?','¿Qué riesgos tiene escuchar sin filtrar ninguna propuesta?'],
+          cases:['<strong>Círculos de calidad (Japón, posguerra):</strong> la participación estructurada del piso de planta mejoró calidad y moral simultáneamente.'] },
+        C: { tag:'Opción C', theory:'Participación Máxima y Autonomía', letter:'card-c', btnClass:'btn-c',
+          cardTitle:'Delegar la Decisión al Grupo',
+          quote:'"Que sean los propios trabajadores quienes decidan cómo reorganizar los turnos."',
+          measures:['🗳️ Entregar al equipo la decisión final sobre los horarios.','📐 Dar un marco general de cobertura mínima requerida.','🤲 No intervenir en el reparto interno de los turnos.'],
+          btnLabel:'Delegar por Completo', sound:'playCoinB',
+          d:{moral:12, prod:3, quality:5},
+          badgeClass:'tag-context', theoryName:'Participación Máxima con Baja Intervención',
+          title:'Autonomía sin Barandas',
+          summary:'El compromiso se dispara: el cuadro de turnos lo arma el propio equipo.',
+          social:'También aparecen dos huecos de cobertura en el cambio de turno que nadie asumió como propio, porque nadie tenía la última palabra sobre coordinación.',
+          quoteRes:'Don Carlos: "Nos organizamos bien casi todo, pero el cambio de turno de las diez se nos escapó a todos."',
+          theoryBody:'Delegar sube el compromiso, pero sin marco ni criterios claros la coordinación se resiente. Participar no es lo mismo que quedarse solo frente a la tarea.',
+          questions:['¿Dónde está el límite entre delegar y desentenderse?','¿Qué mínimo de estructura necesita incluso el equipo más comprometido?'],
+          cases:['<strong>Equipos autogestionados (Semco):</strong> alta autonomía sostenida con reglas mínimas claras de coordinación.'] }
+      }
+    },
+    { // ESCENA 4
+      eyebrow: 'Frente 4 de 4', badge: 'Presión de Cierre',
+      title: 'La presión de la dirección',
+      subtitle: 'La productividad se recupera, pero no llega a la meta. El Directorio exige 10% más el próximo mes.',
+      contextos: {
+        A: 'Los cambios anteriores fueron impuestos, así que hoy no tiene con quién negociar la meta: solo puede imponerla o bajarla usted solo.',
+        B: 'Ya existe una lista de propuestas que salió de la reunión con el equipo. Cualquier meta nueva puede engancharse a ese acuerdo.',
+        C: 'Hay compromiso alto en el equipo, pero también huecos de coordinación sin resolver. La meta nueva va a caer justo sobre esas grietas si no se atienden primero.'
+      },
+      opciones: {
+        A: { tag:'Opción A', theory:'Resultados Operativos Inmediatos', letter:'card-a', btnClass:'btn-a',
+          cardTitle:'Priorizar Exclusivamente la Productividad',
+          quote:'"Los accionistas no esperan; se sube la meta y se refuerza la supervisión."',
+          measures:['📈 Elevar la meta mensual sin negociarla con el equipo.','👁️ Reforzar la supervisión directa sobre el ritmo de trabajo.','⏰ Exigir el cumplimiento inmediato del nuevo estándar.'],
+          btnLabel:'Priorizar el Número', sound:'playAlarmA',
+          d:{moral:-16, prod:14, quality:-8},
+          badgeClass:'tag-crisis', theoryName:'Resultados Operativos Inmediatos',
+          title:'El Número se Cumple',
+          summary:'Se llega al 10% exigido. También llegan dos renuncias y el regreso del clima del primer día.',
+          social:'Lo que se reconstruyó en semanas de diálogo se agrieta en una sola de presión. El equipo vuelve a sentir que solo importa la cifra.',
+          quoteRes:'Dra. Mendoza: "El número está. ¿Por qué se me están yendo los mejores torneros justo ahora?"',
+          theoryBody:'Un pico de productividad sostenido a pura presión es un préstamo contra la moral del equipo, y se cobra con intereses en rotación y calidad.',
+          questions:['¿Qué costo oculto tiene cumplir una meta a costa del clima ya reconstruido?','¿Cómo se explica a la dirección que el número de hoy compromete el de mañana?'],
+          cases:['<strong>Burnout organizacional:</strong> literatura sobre picos de productividad forzada seguidos de caídas más profundas.'] },
+        B: { tag:'Opción B', theory:'Condiciones y Necesidades del Grupo', letter:'card-b', btnClass:'btn-b',
+          cardTitle:'Priorizar el Bienestar del Equipo',
+          quote:'"Se bajan temporalmente las metas hasta que el equipo termine de recuperarse."',
+          measures:['📉 Reducir la meta mensual mientras se consolida el nuevo clima.','🛋️ Proteger los acuerdos de turnos ya alcanzados.','🗣️ Comunicar a la dirección los riesgos de presionar ahora.'],
+          btnLabel:'Priorizar el Bienestar', sound:'playCoinB',
+          d:{moral:12, prod:-8, quality:6},
+          badgeClass:'tag-context', theoryName:'Condiciones y Necesidades del Grupo',
+          title:'Aire para el Equipo, Presión desde Arriba',
+          summary:'El clima mejora y la rotación se detiene. La dirección no recibe el número y empieza a preguntar si el área necesita otro gerente.',
+          social:'El taller respira, pero usted queda expuesto frente al Directorio sin un resultado que lo respalde.',
+          quoteRes:'Dra. Mendoza: "Entiendo el clima, ingeniero. Lo que no entienden los accionistas es por qué bajó la meta."',
+          theoryBody:'Cuidar a las personas sin sostener resultados deja al área sin respaldo político. Un buen clima que nadie defiende arriba dura poco.',
+          questions:['¿Puede un gerente proteger al equipo sin also sostener resultados frente a la dirección?','¿Qué le diría usted al Directorio para justificar esta pausa?'],
+          cases:['<strong>Gestión de expectativas hacia arriba:</strong> la literatura de liderazgo intermedio documenta este dilema de "sandwich management".'] },
+        C: { tag:'Opción C', theory:'Equilibrio entre Productividad y Relaciones Humanas', letter:'card-c', btnClass:'btn-c',
+          cardTitle:'Buscar el Equilibrio',
+          quote:'"Se sostiene el objetivo, pero se trabaja con el equipo los turnos, la comunicación y metas realistas."',
+          measures:['🎯 Negociar metas semanales en vez de una cifra impuesta al mes.','🧩 Resolver primero los huecos de coordinación detectados por el equipo.','📊 Reportar a la dirección un plan con hitos, no solo una promesa.'],
+          btnLabel:'Buscar el Equilibrio', sound:'playHarmonyC',
+          d:{moral:12, prod:14, quality:10},
+          badgeClass:'tag-role', theoryName:'Equilibrio entre Productividad y Relaciones Humanas',
+          title:'La Meta, pero con Ellos Dentro',
+          summary:'Se acuerdan metas por semana en lugar de una cifra impuesta de golpe.',
+          social:'Se llega al 8% el primer mes y se supera el 10% el segundo, sin perder a nadie del equipo. Los huecos de coordinación se cierran con criterios que el propio grupo ayudó a definir.',
+          quoteRes:'Don Carlos: "Cuando la meta se arma con nosotros adentro, deja de sentirse como un castigo."',
+          theoryBody:'Rendimiento y moral no son polos opuestos: se sostienen cuando la meta se construye con el grupo en vez de caerle encima desde arriba.',
+          questions:['¿Por qué construir la meta junto al equipo la vuelve más sostenible en el tiempo?','¿Qué papel jugó todo lo decidido en los frentes anteriores para que este equilibrio fuera posible?'],
+          cases:['<strong>Toyota Production System (Jidoka & Andon):</strong> metas ajustadas con la participación directa del piso de planta.','<strong>Semco Group:</strong> objetivos negociados en lugar de impuestos, sostenidos en el tiempo.'] }
+      }
+    }
+    ];
+
+    /* ======================= MOTOR DE LA SIMULACIÓN ======================= */
+    class SimulatorApp {
+      constructor() {
+        this.sfx = new SoundFX();
+        this.currentPerson = 'carlos';
+        this.isTyping = false;
+        this.typewriterTimer = null;
+
+        this.sceneIndex = 0;      // 0..3 → Escenas 1..4
+        this.state = { moral: 50, prod: 55, quality: 70 };
+        this.pickedThisScene = null;
+        this.history = [];        // registro de decisiones tomadas
+
+        this.dom = {};
+        ['screenBriefing','screenConsole','screenResolution','screenFinal',
+         'btnToggleAudio','iconAudioOn','iconAudioOff','btnResetApp','btnOpenMatrix','modalMatrix',
+         'stepDot1','stepDot2','stepDot3','stepLine1','stepLine2',
+         'briefingStep1','briefingStep2','briefingStep3',
+         'kpiProdNum','kpiScrapNum',
+         'tabCarlos','tabMendoza','viewCarlos','viewMendoza','textCarlos','textMendoza','cursorCarlos','cursorMendoza','btnNextTestimony',
+         'turnHud','sceneProgress',
+         'hudMoral','hudProd','hudQuality','hudMoralFill','hudProdFill','hudQualityFill',
+         'consoleEyebrow','consoleBadge','consoleTitle','consoleSubtitle','consoleContext','cardsGrid','btnBackToBriefing',
+         'resBadgeDec','resBadgeTheory','resTitle','resSummary',
+         'valMoral','barMoral','statusMoral','valProd','barProd','statusProd','valQuality','barQuality','statusQuality',
+         'resSocialDynamic','resQuoteBlock','resTheoryBody','debateQuestionsList','casePillsRow','resolutionActions',
+         'finTitle','finText','finValMoral','finBarMoral','finValProd','finBarProd','finValQuality','finBarQuality','finalLog'
+        ].forEach(id => this.dom[id] = document.getElementById(id));
+
+        this.bindEvents();
+        this.initTelemetryCounters();
+      }
+
+      bindEvents() {
+        this.dom.btnToggleAudio.addEventListener('click', () => {
+          this.sfx.muted = !this.sfx.muted;
+          this.dom.iconAudioOn.style.display = this.sfx.muted ? 'none' : 'inline';
+          this.dom.iconAudioOff.style.display = this.sfx.muted ? 'inline' : 'none';
+          this.dom.btnToggleAudio.classList.toggle('active', !this.sfx.muted);
+          if (!this.sfx.muted) this.sfx.playClick();
+        });
+        this.dom.btnResetApp.addEventListener('click', () => { this.sfx.playClick(); this.resetSimulation(); });
+        this.dom.btnOpenMatrix.addEventListener('click', () => this.openModal());
+        window.addEventListener('keydown', (e) => {
+          if (e.key === 'Escape' && this.dom.modalMatrix.classList.contains('active')) this.closeModal();
+        });
+      }
+
+      initTelemetryCounters() {
+        setTimeout(() => {
+          this.animateCounter(this.dom.kpiProdNum, 100, 75, '', 0, 900);
+          this.animateCounter(this.dom.kpiScrapNum, 2.0, 18.4, '', 1, 900);
+        }, 200);
+      }
+
+      clamp(v) { return Math.max(0, Math.min(100, Math.round(v))); }
+
+      /* ---------- Briefing (solo antes de la escena 1) ---------- */
+      setBriefingStep(stepNum) {
+        this.sfx.playWhoosh();
+        const dots = [this.dom.stepDot1, this.dom.stepDot2, this.dom.stepDot3];
+        dots.forEach((dot, idx) => {
+          const s = idx + 1; dot.classList.remove('active', 'completed');
+          if (s === stepNum) dot.classList.add('active'); else if (s < stepNum) dot.classList.add('completed');
+        });
+        this.dom.stepLine1.classList.toggle('active', stepNum > 1);
+        this.dom.stepLine2.classList.toggle('active', stepNum > 2);
+        [this.dom.briefingStep1, this.dom.briefingStep2, this.dom.briefingStep3].forEach((panel, idx) => {
+          panel.classList.toggle('active', idx + 1 === stepNum);
+        });
+        if (stepNum === 2) this.startTypewriter(this.currentPerson);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      switchDialogue(person) {
+        if (person === this.currentPerson && !this.isTyping) { this.sfx.playClick(); return; }
+        this.sfx.playWhoosh(); this.currentPerson = person;
+        const carlosOn = person === 'carlos';
+        this.dom.tabCarlos.classList.toggle('active', carlosOn);
+        this.dom.tabMendoza.classList.toggle('active', !carlosOn);
+        this.dom.viewCarlos.classList.toggle('active', carlosOn);
+        this.dom.viewMendoza.classList.toggle('active', !carlosOn);
+        this.dom.btnNextTestimony.innerHTML = carlosOn
+          ? '<span>Ver Testimonio de Dra. Mendoza</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="9 18 15 12 9 6"></polyline></svg>'
+          : '<span>Volver a Testimonio de Don Carlos</span><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="15 18 9 12 15 6"></polyline></svg>';
+        this.startTypewriter(person);
+      }
+
+      toggleTestimony() { this.switchDialogue(this.currentPerson === 'carlos' ? 'mendoza' : 'carlos'); }
+
+      startTypewriter(person) {
+        if (this.typewriterTimer) { clearInterval(this.typewriterTimer); this.typewriterTimer = null; }
+        const textEl = person === 'carlos' ? this.dom.textCarlos : this.dom.textMendoza;
+        const cursorEl = person === 'carlos' ? this.dom.cursorCarlos : this.dom.cursorMendoza;
+        const otherCursor = person === 'carlos' ? this.dom.cursorMendoza : this.dom.cursorCarlos;
+        otherCursor.style.display = 'none'; cursorEl.style.display = 'inline-block';
+        const fullText = DIALOGUES[person].text; textEl.textContent = ''; this.isTyping = true;
+        let i = 0; const speed = 14;
+        this.typewriterTimer = setInterval(() => {
+          if (i < fullText.length) { textEl.textContent += fullText[i]; if (i % 5 === 0) this.sfx.playTyping(); i++; }
+          else { clearInterval(this.typewriterTimer); this.typewriterTimer = null; this.isTyping = false;
+            setTimeout(() => { cursorEl.style.display = 'none'; }, 2000); }
+        }, speed);
+      }
+
+      skipTyping(person) {
+        if (this.typewriterTimer) { clearInterval(this.typewriterTimer); this.typewriterTimer = null; }
+        this.isTyping = false;
+        const textEl = person === 'carlos' ? this.dom.textCarlos : this.dom.textMendoza;
+        const cursorEl = person === 'carlos' ? this.dom.cursorCarlos : this.dom.cursorMendoza;
+        textEl.textContent = DIALOGUES[person].text; cursorEl.style.display = 'none'; this.sfx.playClick();
+      }
+
+      /* ---------- Navegación entre pantallas ---------- */
+      showScreen(id) {
+        ['screenBriefing','screenConsole','screenResolution','screenFinal'].forEach(s => {
+          this.dom[s].classList.toggle('active', s === id);
+        });
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+
+      goToBriefing() { this.sfx.playWhoosh(); this.dom.turnHud.classList.remove('show'); this.dom.sceneProgress.style.display = 'none'; this.showScreen('screenBriefing'); }
+
+      goToConsole() {
+        this.sfx.playWhoosh();
+        this.dom.turnHud.classList.add('show');
+        this.dom.sceneProgress.style.display = 'flex';
+        this.updateHud();
+        this.renderConsole();
+        this.showScreen('screenConsole');
+      }
+
+      updateHud() {
+        const s = this.state;
+        this.dom.hudMoral.textContent = s.moral; this.dom.hudProd.textContent = s.prod; this.dom.hudQuality.textContent = s.quality;
+        this.dom.hudMoralFill.style.width = s.moral + '%'; this.dom.hudProdFill.style.width = s.prod + '%'; this.dom.hudQualityFill.style.width = s.quality + '%';
+        const colorOf = v => v >= 70 ? '#10b981' : (v >= 40 ? '#f59e0b' : '#ef4444');
+        this.dom.hudMoralFill.style.background = colorOf(s.moral);
+        this.dom.hudProdFill.style.background = colorOf(s.prod);
+        this.dom.hudQualityFill.style.background = colorOf(s.quality);
+
+        document.querySelectorAll('.scene-dot').forEach(dot => {
+          const n = parseInt(dot.dataset.scene, 10);
+          dot.classList.remove('active','done');
+          if (n < this.sceneIndex) dot.classList.add('done');
+          else if (n === this.sceneIndex) dot.classList.add('active');
+        });
+        document.querySelectorAll('.scene-seg').forEach((seg, idx) => {
+          seg.classList.toggle('done', idx < this.sceneIndex);
+        });
+      }
+
+      renderConsole() {
+        const esc = ESCENAS[this.sceneIndex];
+        this.dom.consoleEyebrow.textContent = esc.eyebrow;
+        this.dom.consoleBadge.textContent = esc.badge;
+        this.dom.consoleTitle.textContent = esc.title;
+        this.dom.consoleSubtitle.textContent = esc.subtitle;
+        this.dom.btnBackToBriefing.style.display = this.sceneIndex === 0 ? 'inline-flex' : 'none';
+
+        let ctxHtml = '';
+        if (esc.contextos && this.pickedThisScene === null) {
+          const prevPick = this.history[this.sceneIndex - 1];
+          if (prevPick) {
+            ctxHtml = `<div class="insight-card" style="border-left:3px solid var(--accent-cyan);">
+              <div class="insight-title">Cómo llega el equipo a este frente</div>
+              <div class="insight-body">${esc.contextos[prevPick]}</div>
+            </div>`;
+          }
+        }
+        this.dom.consoleContext.innerHTML = ctxHtml;
+
+        const grid = this.dom.cardsGrid; grid.innerHTML = '';
+        ['A','B','C'].forEach(letra => {
+          const o = esc.opciones[letra];
+          const card = document.createElement('div');
+          card.className = 'decision-card ' + o.letter;
+          card.onclick = () => this.makeDecision(letra);
+          card.innerHTML = `
+            <div class="card-head">
+              <div class="card-badge-row"><span class="opt-letter opt-tag">${o.tag}</span><span class="opt-theory">${o.theory}</span></div>
+              <h3 class="card-title">${o.cardTitle}</h3>
+              <p class="card-quote">${o.quote}</p>
+            </div>
+            <ul class="measures-list">${o.measures.map(m => {
+              const parts = m.split(' '); const icon = parts.shift();
+              return `<li class="measure-item"><span class="measure-icon">${icon}</span><span>${parts.join(' ')}</span></li>`;
+            }).join('')}</ul>
+            <button class="btn card-btn ${o.btnClass}" onclick="event.stopPropagation(); app.makeDecision('${letra}')">${o.btnLabel}</button>
+          `;
+          grid.appendChild(card);
+        });
+      }
+
+      makeDecision(letra) {
+        const esc = ESCENAS[this.sceneIndex];
+        const o = esc.opciones[letra];
+        if (!o) return;
+
+        this.pickedThisScene = letra;
+        this.history[this.sceneIndex] = letra;
+
+        this.state.moral = this.clamp(this.state.moral + o.d.moral);
+        this.state.prod = this.clamp(this.state.prod + o.d.prod);
+        this.state.quality = this.clamp(this.state.quality + o.d.quality);
+
+        if (typeof this.sfx[o.sound] === 'function') this.sfx[o.sound]();
+
+        this.renderResolution(o);
+        this.showScreen('screenResolution');
+        this.updateHud();
+      }
+
+      renderResolution(o) {
+        this.dom.resBadgeDec.textContent = o.tag + ': ' + o.cardTitle;
+        this.dom.resBadgeDec.className = 'hero-tag ' + o.badgeClass;
+        this.dom.resBadgeTheory.textContent = o.theoryName;
+        this.dom.resTitle.textContent = o.title;
+        this.dom.resSummary.textContent = o.summary;
+        this.dom.resSocialDynamic.innerHTML = o.social;
+        this.dom.resQuoteBlock.textContent = o.quoteRes;
+        this.dom.resTheoryBody.innerHTML = o.theoryBody;
+        this.dom.debateQuestionsList.innerHTML = o.questions.map((q, idx) => `<li class="question-item"><span class="q-num">${idx+1}</span><span>${q}</span></li>`).join('');
+        this.dom.casePillsRow.innerHTML = o.cases.map(c => `<div class="case-pill">${c}</div>`).join('');
+
+        const s = this.state;
+        this.dom.barMoral.style.width = '0%'; this.dom.barProd.style.width = '0%'; this.dom.barQuality.style.width = '0%';
+        this.dom.valMoral.textContent = '0%'; this.dom.valProd.textContent = '0%'; this.dom.valQuality.textContent = '0%';
+
+        const statusText = (v, label) => v >= 70 ? `${label}: sólido` : (v >= 40 ? `${label}: inestable` : `${label}: en riesgo`);
+        this.dom.statusMoral.textContent = statusText(s.moral, 'Clima');
+        this.dom.statusProd.textContent = statusText(s.prod, 'Operación');
+        this.dom.statusQuality.textContent = statusText(s.quality, 'Calidad');
+
+        const colorOf = v => v >= 70 ? '#10b981' : (v >= 40 ? '#f59e0b' : '#ef4444');
+        setTimeout(() => {
+          this.dom.barMoral.style.backgroundColor = colorOf(s.moral);
+          this.dom.barProd.style.backgroundColor = colorOf(s.prod);
+          this.dom.barQuality.style.backgroundColor = colorOf(s.quality);
+          this.dom.barMoral.style.width = s.moral + '%';
+          this.dom.barProd.style.width = s.prod + '%';
+          this.dom.barQuality.style.width = s.quality + '%';
+          this.dom.valMoral.style.color = colorOf(s.moral);
+          this.dom.valProd.style.color = colorOf(s.prod);
+          this.dom.valQuality.style.color = colorOf(s.quality);
+          this.animateCounter(this.dom.valMoral, 0, s.moral, '%');
+          this.animateCounter(this.dom.valProd, 0, s.prod, '%');
+          this.animateCounter(this.dom.valQuality, 0, s.quality, '%');
+        }, 150);
+
+        const actions = this.dom.resolutionActions; actions.innerHTML = '';
+        const btnBack = document.createElement('button');
+        btnBack.className = 'btn btn-outline btn-large';
+        btnBack.textContent = 'Explorar otra alternativa en este frente';
+        btnBack.onclick = () => { this.pickedThisScene = null; this.goToConsole(); };
+        actions.appendChild(btnBack);
+
+        const btnNext = document.createElement('button');
+        btnNext.className = 'btn btn-primary btn-large';
+        if (this.sceneIndex < ESCENAS.length - 1) {
+          btnNext.textContent = 'Seguir al siguiente frente';
+          btnNext.onclick = () => { this.sceneIndex++; this.pickedThisScene = null; this.goToConsole(); };
+        } else {
+          btnNext.textContent = 'Ver el cierre del turno';
+          btnNext.onclick = () => this.goToFinal();
+        }
+        actions.appendChild(btnNext);
+      }
+
+      goToFinal() {
+        const s = this.state;
+        let tit;
+        if (s.moral >= 70 && s.prod >= 70) tit = 'La planta produce y la gente se queda';
+        else if (s.prod >= 70) tit = 'Cumplió el número; el equipo pagó la cuenta';
+        else if (s.moral >= 70) tit = 'Buen clima, resultados todavía cortos';
+        else tit = 'Ni el número ni la gente';
+
+        this.dom.finTitle.textContent = tit;
+        this.dom.finText.textContent = 'Estos tres indicadores salieron de las mismas cuatro decisiones. Compárelos con los de otro grupo que haya jugado: casi nadie llega al mismo lugar.';
+
+        const letraLabel = { A: 'Opción A', B: 'Opción B', C: 'Opción C' };
+        this.dom.finalLog.innerHTML = 'Su turno: ' + ESCENAS.map((e, idx) =>
+          `<b>${letraLabel[this.history[idx]]}</b> en ${e.eyebrow.toLowerCase()}`
+        ).join(' → ');
+
+        this.dom.finValMoral.textContent = s.moral + '%';
+        this.dom.finValProd.textContent = s.prod + '%';
+        this.dom.finValQuality.textContent = s.quality + '%';
+        this.dom.finBarMoral.style.width = '0%'; this.dom.finBarProd.style.width = '0%'; this.dom.finBarQuality.style.width = '0%';
+
+        const colorOf = v => v >= 70 ? '#10b981' : (v >= 40 ? '#f59e0b' : '#ef4444');
+        this.showScreen('screenFinal');
+        this.dom.turnHud.classList.remove('show');
+        this.dom.sceneProgress.style.display = 'none';
+        setTimeout(() => {
+          this.dom.finBarMoral.style.background = colorOf(s.moral);
+          this.dom.finBarProd.style.background = colorOf(s.prod);
+          this.dom.finBarQuality.style.background = colorOf(s.quality);
+          this.dom.finBarMoral.style.width = s.moral + '%';
+          this.dom.finBarProd.style.width = s.prod + '%';
+          this.dom.finBarQuality.style.width = s.quality + '%';
+        }, 150);
+      }
+
+      animateCounter(element, start, end, suffix = '', decimals = 0, duration = 1000) {
+        if (!element) return;
+        const startTime = performance.now();
+        const step = (t) => {
+          const progress = Math.min((t - startTime) / duration, 1);
+          const ease = 1 - Math.pow(1 - progress, 3);
+          const val = start + (end - start) * ease;
+          element.textContent = (decimals > 0 ? val.toFixed(decimals) : Math.round(val)) + suffix;
+          if (progress < 1) requestAnimationFrame(step);
+        };
+        requestAnimationFrame(step);
+      }
+
+      openModal() { this.sfx.playClick(); this.dom.modalMatrix.classList.add('active'); document.body.style.overflow = 'hidden'; }
+      closeModal() { this.sfx.playClick(); this.dom.modalMatrix.classList.remove('active'); document.body.style.overflow = ''; }
+
+      resetSimulation() {
+        this.sceneIndex = 0;
+        this.state = { moral: 50, prod: 55, quality: 70 };
+        this.pickedThisScene = null;
+        this.history = [];
+        this.currentPerson = 'carlos';
+        this.setBriefingStep(1);
+        this.switchDialogue('carlos');
+        this.goToBriefing();
+      }
+    }
+
+    let app;
+    window.addEventListener('DOMContentLoaded', () => { app = new SimulatorApp(); });
+  </script>
+</body>
+</html>
