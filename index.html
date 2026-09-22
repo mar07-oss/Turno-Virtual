@@ -500,8 +500,81 @@ body{font-family:var(--font-main);background:var(--bg-base);color:var(--text-pri
 </footer>
 
 <script>
-function getPortraitDonCarlosSvg(size=72){return `<svg viewBox="0 0 100 100" width="${size}" height="${size}" class="portrait-svg" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="47" fill="#F5F5EB" stroke="#B3907A" stroke-width="2.5"/><circle cx="50" cy="50" r="40" fill="#EFE7DA" fill-opacity="0.6"/><path d="M 18 92 C 22 75 35 70 50 70 C 65 70 78 75 82 92" fill="#E1DACA" stroke="#2C2420" stroke-width="2"/><rect x="42" y="56" width="16" height="16" fill="#F5F5EB" stroke="#2C2420" stroke-width="1.5" rx="2"/><path d="M 36 38 C 36 28 64 28 64 38 C 64 54 59 62 50 62 C 41 62 36 54 36 38 Z" fill="#F5F5EB" stroke="#2C2420" stroke-width="2"/><path d="M 30 36 C 30 22 70 22 70 36 C 74 37 68 40 50 40 C 32 40 26 37 30 36 Z" fill="#B3907A" stroke="#2C2420" stroke-width="2"/><circle cx="50" cy="88" r="9" fill="#EFE7DA" stroke="#B3907A" stroke-width="1.5"/></svg>`;}
-function getPortraitDraMendozaSvg(size=72){return `<svg viewBox="0 0 100 100" width="${size}" height="${size}" class="portrait-svg" xmlns="http://www.w3.org/2000/svg"><circle cx="50" cy="50" r="47" fill="#F5F5EB" stroke="#B3907A" stroke-width="2.5"/><circle cx="50" cy="50" r="40" fill="#EFE7DA" fill-opacity="0.6"/><path d="M 18 92 C 22 74 34 68 50 68 C 66 68 78 74 82 92" fill="#2C2420" stroke="#2C2420" stroke-width="2"/><rect x="44" y="55" width="12" height="14" fill="#F5F5EB" stroke="#2C2420" stroke-width="1.5" rx="1"/><path d="M 37 36 C 37 26 63 26 63 36 C 63 52 58 60 50 60 C 42 60 37 52 37 36 Z" fill="#F5F5EB" stroke="#2C2420" stroke-width="2"/><path d="M 33 42 C 32 24 42 19 50 19 C 58 19 68 24 67 42 C 67 48 64 52 64 52 C 64 36 60 26 50 26 C 40 26 36 36 36 52 C 36 52 33 48 33 42 Z" fill="#2C2420" stroke="#2C2420" stroke-width="1.5"/><circle cx="50" cy="88" r="9" fill="#EFE7DA" stroke="#B3907A" stroke-width="1.5"/></svg>`;}
+function getPortraitDonCarlosSvg(size = 72) {
+  return `<svg viewBox="0 0 100 100" width="${size}" height="${size}" class="portrait-svg portrait-carlos" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="47" fill="#F5F5EB" stroke="#B3907A" stroke-width="2.5"/>
+    <circle cx="50" cy="50" r="43" fill="none" stroke="#C1B6A3" stroke-width="1" stroke-dasharray="3 2"/>
+    <circle cx="50" cy="50" r="40" fill="#EFE7DA" fill-opacity="0.6"/>
+
+    <path d="M 18 92 C 22 75 35 70 50 70 C 65 70 78 75 82 92" fill="#E1DACA" stroke="#2C2420" stroke-width="2"/>
+    <path d="M 33 70 L 33 92 M 67 70 L 67 92" stroke="#B3907A" stroke-width="2.5"/>
+    <line x1="50" y1="70" x2="50" y2="85" stroke="#2C2420" stroke-width="1.5"/>
+    <circle cx="33" cy="74" r="2" fill="#2C2420"/>
+    <circle cx="67" cy="74" r="2" fill="#2C2420"/>
+
+    <rect x="42" y="56" width="16" height="16" fill="#F5F5EB" stroke="#2C2420" stroke-width="1.5" rx="2"/>
+    <line x1="45" y1="64" x2="55" y2="64" stroke="#C1B6A3" stroke-width="1.2"/>
+
+    <circle cx="34" cy="46" r="4" fill="#F5F5EB" stroke="#2C2420" stroke-width="1.5"/>
+    <circle cx="66" cy="46" r="4" fill="#F5F5EB" stroke="#2C2420" stroke-width="1.5"/>
+    <path d="M 36 38 C 36 28 64 28 64 38 C 64 54 59 62 50 62 C 41 62 36 54 36 38 Z" fill="#F5F5EB" stroke="#2C2420" stroke-width="2"/>
+
+    <path d="M 40 37 Q 44 35 47 37" stroke="#2C2420" stroke-width="1.75" fill="none"/>
+    <path d="M 53 37 Q 56 35 60 37" stroke="#2C2420" stroke-width="1.75" fill="none"/>
+    <circle cx="43.5" cy="41" r="1.5" fill="#2C2420"/>
+    <circle cx="56.5" cy="41" r="1.5" fill="#2C2420"/>
+    <line x1="38" y1="41" x2="36" y2="40" stroke="#786B62" stroke-width="1"/>
+    <line x1="62" y1="41" x2="64" y2="40" stroke="#786B62" stroke-width="1"/>
+
+    <path d="M 50 38 L 50 47 L 53 47" fill="none" stroke="#2C2420" stroke-width="1.5" stroke-linecap="round"/>
+    <path d="M 41 53 Q 50 49 59 53 Q 50 56 41 53 Z" fill="#786B62" stroke="#2C2420" stroke-width="1.2"/>
+    <path d="M 46 57 Q 50 58 54 57" stroke="#2C2420" stroke-width="1.2" fill="none"/>
+
+    <path d="M 30 36 C 30 22 70 22 70 36 C 74 37 68 40 50 40 C 32 40 26 37 30 36 Z" fill="#B3907A" stroke="#2C2420" stroke-width="2"/>
+    <path d="M 28 37 C 38 41 62 41 72 37" fill="none" stroke="#2C2420" stroke-width="2"/>
+    <line x1="45" y1="24" x2="50" y2="35" stroke="#E1DACA" stroke-width="1"/>
+
+    <circle cx="50" cy="88" r="9" fill="#EFE7DA" stroke="#B3907A" stroke-width="1.5"/>
+    <path d="M 46 85 L 54 91 M 46 91 L 54 85" stroke="#2C2420" stroke-width="1.5" stroke-linecap="round"/>
+  </svg>`;
+}
+function getPortraitDraMendozaSvg(size = 72) {
+  return `<svg viewBox="0 0 100 100" width="${size}" height="${size}" class="portrait-svg portrait-mendoza" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="47" fill="#F5F5EB" stroke="#B3907A" stroke-width="2.5"/>
+    <circle cx="50" cy="50" r="43" fill="none" stroke="#C1B6A3" stroke-width="1" stroke-dasharray="3 2"/>
+    <circle cx="50" cy="50" r="40" fill="#EFE7DA" fill-opacity="0.6"/>
+
+    <path d="M 18 92 C 22 74 34 68 50 68 C 66 68 78 74 82 92" fill="#2C2420" stroke="#2C2420" stroke-width="2"/>
+    <path d="M 40 68 L 50 82 L 60 68" fill="#F5F5EB" stroke="#C1B6A3" stroke-width="1.5"/>
+    <path d="M 33 68 L 45 84 M 67 68 L 55 84" stroke="#B3907A" stroke-width="1.75"/>
+
+    <rect x="44" y="55" width="12" height="14" fill="#F5F5EB" stroke="#2C2420" stroke-width="1.5" rx="1"/>
+    <circle cx="35" cy="44" r="3.5" fill="#F5F5EB" stroke="#2C2420" stroke-width="1.5"/>
+    <circle cx="65" cy="44" r="3.5" fill="#F5F5EB" stroke="#2C2420" stroke-width="1.5"/>
+    <circle cx="35" cy="46" r="1.2" fill="#B3907A"/>
+    <circle cx="65" cy="46" r="1.2" fill="#B3907A"/>
+
+    <path d="M 37 36 C 37 26 63 26 63 36 C 63 52 58 60 50 60 C 42 60 37 52 37 36 Z" fill="#F5F5EB" stroke="#2C2420" stroke-width="2"/>
+
+    <rect x="38" y="37" width="10" height="7" rx="2" fill="none" stroke="#2C2420" stroke-width="1.5"/>
+    <rect x="52" y="37" width="10" height="7" rx="2" fill="none" stroke="#2C2420" stroke-width="1.5"/>
+    <line x1="48" y1="40" x2="52" y2="40" stroke="#2C2420" stroke-width="1.5"/>
+    <path d="M 38 34 Q 43 33 48 35" stroke="#2C2420" stroke-width="1.5" fill="none"/>
+    <path d="M 52 35 Q 57 33 62 34" stroke="#2C2420" stroke-width="1.5" fill="none"/>
+    <circle cx="43" cy="40.5" r="1.3" fill="#2C2420"/>
+    <circle cx="57" cy="40.5" r="1.3" fill="#2C2420"/>
+
+    <path d="M 50 41 L 49.5 48 L 52 48" fill="none" stroke="#2C2420" stroke-width="1.3" stroke-linecap="round"/>
+    <line x1="46" y1="53" x2="54" y2="53" stroke="#8C2D19" stroke-width="1.5" stroke-linecap="round"/>
+
+    <path d="M 33 42 C 32 24 42 19 50 19 C 58 19 68 24 67 42 C 67 48 64 52 64 52 C 64 36 60 26 50 26 C 40 26 36 36 36 52 C 36 52 33 48 33 42 Z" fill="#2C2420" stroke="#2C2420" stroke-width="1.5"/>
+
+    <circle cx="50" cy="88" r="9" fill="#EFE7DA" stroke="#B3907A" stroke-width="1.5"/>
+    <rect x="46" y="83" width="8" height="10" rx="1" fill="#F5F5EB" stroke="#2C2420" stroke-width="1.2"/>
+    <line x1="48" y1="87" x2="52" y2="87" stroke="#2C2420" stroke-width="1"/>
+    <line x1="48" y1="89" x2="52" y2="89" stroke="#2C2420" stroke-width="1"/>
+  </svg>`;
+}
 
 function getManagerialGridSvg(peopleScore=5.5, taskScore=5.5){
   const clampedX=Math.max(1,Math.min(9,peopleScore)), clampedY=Math.max(1,Math.min(9,taskScore));
