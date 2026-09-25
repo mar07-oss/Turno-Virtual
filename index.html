@@ -216,7 +216,14 @@ body{font-family:var(--font-main);background:var(--bg-base);color:var(--text-pri
 .grid-coord-col{display:flex;flex-direction:column;gap:.2rem}
 .grid-coord-label{font-size:.72rem;text-transform:uppercase;font-weight:700;color:var(--text-secondary)}
 .grid-coord-val{font-family:var(--font-mono);font-size:1.25rem;font-weight:800;color:var(--text-primary)}
-@media (max-width:640px){.container{padding:.85rem .65rem 3rem}.app-footer{padding:1.15rem .75rem;font-size:.76rem;line-height:1.55}}
+.blueprint-card{background:var(--bg-card);border:1px solid var(--border-subtle);border-radius:var(--radius-lg);padding:1.25rem;margin:1.5rem 0 1.75rem;box-shadow:var(--shadow-sm)}
+.blueprint-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.6rem;margin-bottom:.85rem}
+.blueprint-header-title{display:flex;align-items:center;gap:.5rem;font-size:.96rem;font-weight:800;color:var(--text-primary)}
+.blueprint-header-title svg{color:var(--accent-primary);flex-shrink:0}
+.blueprint-tag{font-size:.74rem;font-weight:700;color:var(--text-secondary);font-family:var(--font-mono);background:var(--bg-panel);padding:.25rem .65rem;border-radius:var(--radius-full);border:1px solid var(--border-subtle)}
+.blueprint-canvas-wrap{border-radius:var(--radius-md);overflow:hidden;border:1px solid var(--border-subtle);background:#EFE7DA;display:flex;justify-content:center}
+.blueprint-svg{display:block;width:100%;height:auto}
+@media (max-width:640px){.container{padding:.85rem .65rem 3rem}.app-footer{padding:1.15rem .75rem;font-size:.76rem;line-height:1.55}.blueprint-card{padding:.75rem .65rem;margin:1rem 0;border-radius:var(--radius-md)}}
 </style>
 </head>
 <body>
@@ -237,6 +244,10 @@ body{font-family:var(--font-main);background:var(--bg-base);color:var(--text-pri
       <button id="btnAudioToggle" class="btn btn-icon active" title="Silenciar / Activar Sonido">
         <svg id="iconAudioOn" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
         <svg id="iconAudioOff" style="display:none;" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><line x1="23" y1="9" x2="17" y2="15"/><line x1="17" y1="9" x2="23" y2="15"/></svg>
+      </button>
+      <button id="btnOpenBlueprint" class="btn btn-outline" title="Ver Plano Esquemático de Planta">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        Plano de Planta
       </button>
       <button id="btnOpenMatrix" class="btn btn-outline" title="Ver Fundamentos Teóricos">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>
@@ -299,6 +310,17 @@ body{font-family:var(--font-main);background:var(--bg-base);color:var(--text-pri
         <div class="crisis-metric-card"><div class="crisis-metric-label">Desplome de Volumen</div><div class="crisis-metric-value danger">-25%</div><div class="crisis-metric-desc">Frente a la capacidad nominal estándar</div></div>
         <div class="crisis-metric-card"><div class="crisis-metric-label">Rechazo de Piezas (Scrap)</div><div class="crisis-metric-value danger">18.4%</div><div class="crisis-metric-desc">Tolerancia contractual máxima: 2.0%</div></div>
         <div class="crisis-metric-card"><div class="crisis-metric-label">Penalización en Riesgo</div><div class="crisis-metric-value">25,000 USD</div><div class="crisis-metric-desc">Multa y rescisión de contrato con el cliente</div></div>
+      </div>
+
+      <div class="blueprint-card">
+        <div class="blueprint-header">
+          <div class="blueprint-header-title">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+            <span>Plano Esquemático de Planta: Nave Central SideroSur</span>
+          </div>
+          <span class="blueprint-tag">Superficie: 4,800 m² &bull; CAD Rev 4.2</span>
+        </div>
+        <div class="blueprint-canvas-wrap" id="prologueBlueprintContainer"></div>
       </div>
 
       <div class="perspectives-card">
@@ -470,6 +492,20 @@ body{font-family:var(--font-main);background:var(--bg-base);color:var(--text-pri
 
 </main>
 
+<div class="modal-backdrop" id="modalBlueprintBackdrop">
+  <div class="modal-window" style="max-width:960px;">
+    <div class="modal-header">
+      <h2><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>Plano Esquemático de Planta: Nave Central SideroSur</h2>
+      <button id="btnCloseBlueprint" class="btn btn-icon" title="Cerrar plano"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+    </div>
+    <div class="modal-body">
+      <div class="blueprint-canvas-wrap">
+        <div id="modalBlueprintContainer" style="width:100%;"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-backdrop" id="modalMatrixBackdrop">
   <div class="modal-window">
     <div class="modal-header">
@@ -500,6 +536,183 @@ body{font-family:var(--font-main);background:var(--bg-base);color:var(--text-pri
 </footer>
 
 <script>
+function getBlueprintSvg() {
+  return `<svg viewBox="0 0 860 440" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" class="blueprint-svg" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <pattern id="bpGridSmall" width="15" height="15" patternUnits="userSpaceOnUse">
+        <path d="M 15 0 L 0 0 0 15" fill="none" stroke="#C1B6A3" stroke-width="0.5" stroke-opacity="0.3" />
+      </pattern>
+      <pattern id="bpGridLarge" width="60" height="60" patternUnits="userSpaceOnUse">
+        <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#B3907A" stroke-width="0.75" stroke-opacity="0.25" />
+      </pattern>
+      <marker id="bpArrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto">
+        <polygon points="0 0, 6 3, 0 6" fill="#786B62"/>
+      </marker>
+    </defs>
+
+    <rect width="860" height="440" fill="#EFE7DA" rx="8"/>
+    <rect width="860" height="440" fill="url(#bpGridSmall)" rx="8"/>
+    <rect width="860" height="440" fill="url(#bpGridLarge)" rx="8"/>
+    <rect x="10" y="10" width="840" height="420" fill="none" stroke="#C1B6A3" stroke-width="1.5" stroke-dasharray="6 4" rx="6"/>
+
+    <g transform="translate(24, 30)">
+      <text x="0" y="0" font-family="system-ui, sans-serif" font-size="11.5" font-weight="800" fill="#2C2420" letter-spacing="0.5">PLANO TÉCNICO GENERAL // DISTRIBUCIÓN OPERATIVA DE PLANTA SIDEROSUR</text>
+      <text x="812" y="0" font-family="monospace, sans-serif" font-size="9" font-weight="600" fill="#786B62" text-anchor="end">SUPERFICIE: 4,800 m² | ESCALA 1:300 | SISTEMA: CAD-SID 4.2</text>
+      <line x1="0" y1="8" x2="812" y2="8" stroke="#C1B6A3" stroke-width="1"/>
+    </g>
+
+    <g transform="translate(24, 48)">
+      <rect x="0" y="0" width="380" height="316" fill="#E1DACA" fill-opacity="0.6" stroke="#B3907A" stroke-width="1.5" rx="6"/>
+      <rect x="0" y="0" width="380" height="24" fill="#B3907A" fill-opacity="0.18" rx="6 6 0 0"/>
+      <text x="12" y="16" font-family="system-ui, sans-serif" font-size="9.5" font-weight="800" fill="#2C2420" letter-spacing="0.3">NAVE 2: CÉLULA DE MECANIZADO</text>
+      <text x="368" y="16" font-family="monospace, sans-serif" font-size="8.5" font-weight="700" fill="#786B62" text-anchor="end">6 TORNOS + RECTIFICADORA</text>
+
+      <g transform="translate(18, 36)">
+        <rect x="0" y="0" width="64" height="34" fill="#F5F5EB" stroke="#C1B6A3" stroke-width="1.2" rx="3"/>
+        <rect x="6" y="6" width="16" height="22" fill="#E1DACA" stroke="#C1B6A3" stroke-width="1"/>
+        <circle cx="48" cy="17" r="7" fill="none" stroke="#786B62" stroke-width="1.2"/>
+        <text x="32" y="44" font-family="monospace, sans-serif" font-size="8" font-weight="700" fill="#574C43" text-anchor="middle">TORNO 1</text>
+      </g>
+      <g transform="translate(100, 36)">
+        <rect x="0" y="0" width="64" height="34" fill="#F5F5EB" stroke="#C1B6A3" stroke-width="1.2" rx="3"/>
+        <rect x="6" y="6" width="16" height="22" fill="#E1DACA" stroke="#C1B6A3" stroke-width="1"/>
+        <circle cx="48" cy="17" r="7" fill="none" stroke="#786B62" stroke-width="1.2"/>
+        <text x="32" y="44" font-family="monospace, sans-serif" font-size="8" font-weight="700" fill="#574C43" text-anchor="middle">TORNO 2</text>
+      </g>
+      <g transform="translate(182, 36)">
+        <rect x="0" y="0" width="64" height="34" fill="#F5F5EB" stroke="#C1B6A3" stroke-width="1.2" rx="3"/>
+        <rect x="6" y="6" width="16" height="22" fill="#E1DACA" stroke="#C1B6A3" stroke-width="1"/>
+        <circle cx="48" cy="17" r="7" fill="none" stroke="#786B62" stroke-width="1.2"/>
+        <text x="32" y="44" font-family="monospace, sans-serif" font-size="8" font-weight="700" fill="#574C43" text-anchor="middle">TORNO 3</text>
+      </g>
+
+      <g transform="translate(18, 96)">
+        <rect x="0" y="0" width="64" height="34" fill="#F5F5EB" stroke="#C1B6A3" stroke-width="1.2" rx="3"/>
+        <rect x="6" y="6" width="16" height="22" fill="#E1DACA" stroke="#C1B6A3" stroke-width="1"/>
+        <circle cx="48" cy="17" r="7" fill="none" stroke="#786B62" stroke-width="1.2"/>
+        <text x="32" y="44" font-family="monospace, sans-serif" font-size="8" font-weight="700" fill="#574C43" text-anchor="middle">TORNO 4</text>
+      </g>
+      <g transform="translate(100, 96)">
+        <rect x="0" y="0" width="64" height="34" fill="#F5F5EB" stroke="#C1B6A3" stroke-width="1.2" rx="3"/>
+        <rect x="6" y="6" width="16" height="22" fill="#E1DACA" stroke="#C1B6A3" stroke-width="1"/>
+        <circle cx="48" cy="17" r="7" fill="none" stroke="#786B62" stroke-width="1.2"/>
+        <text x="32" y="44" font-family="monospace, sans-serif" font-size="8" font-weight="700" fill="#574C43" text-anchor="middle">TORNO 5</text>
+      </g>
+      <g transform="translate(182, 94)">
+        <circle cx="32" cy="17" r="30" fill="#B3907A" fill-opacity="0.14" stroke="#B3907A" stroke-width="1.5" stroke-dasharray="3 3"/>
+        <rect x="0" y="0" width="64" height="34" fill="#F5F5EB" stroke="#B3907A" stroke-width="1.5" rx="3"/>
+        <rect x="6" y="6" width="16" height="22" fill="#B3907A" fill-opacity="0.25" stroke="#B3907A" stroke-width="1"/>
+        <circle cx="48" cy="17" r="7" fill="none" stroke="#B3907A" stroke-width="1.5"/>
+        <text x="32" y="44" font-family="monospace, sans-serif" font-size="7.5" font-weight="800" fill="#8C2D19" text-anchor="middle">TORNO 6 (CARLOS)</text>
+        <text x="32" y="55" font-family="system-ui, sans-serif" font-size="7" font-weight="700" fill="#B3907A" text-anchor="middle">LÍDER INFORMAL</text>
+      </g>
+
+      <g transform="translate(18, 168)">
+        <rect x="0" y="0" width="344" height="136" fill="#F5F5EB" stroke="#8C2D19" stroke-width="1.5" rx="4"/>
+        <circle cx="28" cy="50" r="16" fill="#8C2D19" fill-opacity="0.2">
+          <animate attributeName="r" values="10;18;10" dur="2s" repeatCount="indefinite"/>
+          <animate attributeName="fill-opacity" values="0.3;0.05;0.3" dur="2s" repeatCount="indefinite"/>
+        </circle>
+        <circle cx="28" cy="50" r="6" fill="#8C2D19"/>
+        <circle cx="28" cy="50" r="2" fill="#FFFFFF"/>
+
+        <text x="56" y="24" font-family="system-ui, sans-serif" font-size="9.5" font-weight="800" fill="#8C2D19">RECTIFICADORA #4 [PUNTO CRÍTICO 23:30]</text>
+        <text x="56" y="42" font-family="system-ui, sans-serif" font-size="8.5" font-weight="600" fill="#574C43">Husillo con vibración severa &bull; Temp: 84°C</text>
+        <text x="56" y="58" font-family="system-ui, sans-serif" font-size="8" font-weight="600" fill="#574C43">Cuello de botella térmico en mecanizado</text>
+        <text x="56" y="74" font-family="system-ui, sans-serif" font-size="7.5" font-weight="700" fill="#786B62">Riesgo: Parada total de nave por dilatación</text>
+
+        <rect x="56" y="86" width="110" height="22" fill="rgba(140, 45, 25, 0.12)" stroke="#8C2D19" stroke-width="1" rx="3"/>
+        <text x="111" y="101" font-family="monospace, sans-serif" font-size="8" font-weight="800" fill="#8C2D19" text-anchor="middle">ALERTA CRÍTICA</text>
+      </g>
+    </g>
+
+    <g transform="translate(422, 48)">
+      <rect x="0" y="0" width="216" height="150" fill="#E1DACA" fill-opacity="0.6" stroke="#C1B6A3" stroke-width="1.5" rx="6"/>
+      <rect x="0" y="0" width="216" height="24" fill="#C1B6A3" fill-opacity="0.3" rx="6 6 0 0"/>
+      <text x="10" y="16" font-family="system-ui, sans-serif" font-size="9" font-weight="800" fill="#2C2420">CONTROL DE CALIDAD & METROLOGÍA</text>
+
+      <rect x="12" y="34" width="192" height="48" fill="#F5F5EB" stroke="#C1B6A3" stroke-width="1" rx="3"/>
+      <text x="20" y="50" font-family="monospace, sans-serif" font-size="8" font-weight="700" fill="#574C43">Mesa de Micrómetros & Rugosímetros</text>
+      <text x="20" y="66" font-family="system-ui, sans-serif" font-size="7.5" font-weight="700" fill="#8C2D19">Tol: &plusmn;0.015 mm | Scrap actual: 18.4%</text>
+
+      <rect x="12" y="90" width="192" height="48" fill="#F5F5EB" stroke="#C1B6A3" stroke-width="1" rx="3"/>
+      <text x="20" y="108" font-family="system-ui, sans-serif" font-size="7.5" font-weight="700" fill="#786B62">Estándar: 2.0% Máx de merma</text>
+      <text x="20" y="122" font-family="system-ui, sans-serif" font-size="7.2" font-weight="600" fill="#574C43">Desviación acumulada por fatiga</text>
+    </g>
+
+    <g transform="translate(422, 210)">
+      <rect x="0" y="0" width="216" height="154" fill="#E1DACA" fill-opacity="0.6" stroke="#C1B6A3" stroke-width="1.5" rx="6"/>
+      <rect x="0" y="0" width="216" height="24" fill="#C1B6A3" fill-opacity="0.3" rx="6 6 0 0"/>
+      <text x="10" y="16" font-family="system-ui, sans-serif" font-size="9" font-weight="800" fill="#2C2420">ÁREA DE DESCANSO & NÚCLEO SOCIAL</text>
+
+      <rect x="12" y="32" width="192" height="54" fill="#F5F5EB" stroke="#C1B6A3" stroke-width="1" rx="3"/>
+      <text x="20" y="48" font-family="system-ui, sans-serif" font-size="8" font-weight="700" fill="#2C2420">Punto de Encuentro Informal</text>
+      <text x="20" y="62" font-family="system-ui, sans-serif" font-size="7.5" font-weight="600" fill="#574C43">Cafetera y debate de cuadrilla (02:00)</text>
+      <text x="20" y="74" font-family="system-ui, sans-serif" font-size="7" font-weight="600" fill="#B3907A">Espacio de articulación obrera</text>
+
+      <rect x="12" y="94" width="192" height="46" fill="#F5F5EB" stroke="#C1B6A3" stroke-width="1" rx="3"/>
+      <text x="20" y="112" font-family="system-ui, sans-serif" font-size="7.5" font-weight="700" fill="#574C43">Oficina de Jefatura Formal</text>
+      <text x="20" y="126" font-family="system-ui, sans-serif" font-size="7.2" font-weight="600" fill="#786B62">Supervisión jerárquica aislada</text>
+    </g>
+
+    <g transform="translate(654, 48)">
+      <rect x="0" y="0" width="182" height="316" fill="#E1DACA" fill-opacity="0.6" stroke="#B3907A" stroke-width="1.5" rx="6"/>
+      <rect x="0" y="0" width="182" height="24" fill="#B3907A" fill-opacity="0.18" rx="6 6 0 0"/>
+      <text x="10" y="16" font-family="system-ui, sans-serif" font-size="9" font-weight="800" fill="#2C2420">BAHÍA DE CARGA #1</text>
+      <text x="172" y="16" font-family="monospace, sans-serif" font-size="8" font-weight="700" fill="#8C2D19" text-anchor="end">05:30</text>
+
+      <g transform="translate(10, 34)">
+        <rect x="0" y="0" width="162" height="136" fill="#F5F5EB" stroke="#B3907A" stroke-width="1.2" rx="4"/>
+        <text x="81" y="18" font-family="system-ui, sans-serif" font-size="8" font-weight="800" fill="#2C2420" text-anchor="middle">CAMIÓN DE EXPORTACIÓN</text>
+        <line x1="8" y1="24" x2="154" y2="24" stroke="#C1B6A3" stroke-width="1"/>
+
+        <g transform="translate(8, 30)">
+          <rect x="0" y="0" width="32" height="30" fill="rgba(45, 74, 34, 0.15)" stroke="#2D4A22" stroke-width="1" rx="2"/>
+          <text x="16" y="19" font-family="monospace, sans-serif" font-size="7.5" font-weight="700" fill="#2D4A22" text-anchor="middle">OK</text>
+          <rect x="37" y="0" width="32" height="30" fill="rgba(45, 74, 34, 0.15)" stroke="#2D4A22" stroke-width="1" rx="2"/>
+          <text x="53" y="19" font-family="monospace, sans-serif" font-size="7.5" font-weight="700" fill="#2D4A22" text-anchor="middle">OK</text>
+          <rect x="74" y="0" width="32" height="30" fill="rgba(45, 74, 34, 0.15)" stroke="#2D4A22" stroke-width="1" rx="2"/>
+          <text x="90" y="19" font-family="monospace, sans-serif" font-size="7.5" font-weight="700" fill="#2D4A22" text-anchor="middle">OK</text>
+          <rect x="111" y="0" width="34" height="30" fill="rgba(140, 45, 25, 0.15)" stroke="#8C2D19" stroke-width="1.2" stroke-dasharray="2 2" rx="2"/>
+          <text x="128" y="19" font-family="monospace, sans-serif" font-size="7" font-weight="800" fill="#8C2D19" text-anchor="middle">-380</text>
+        </g>
+
+        <text x="81" y="80" font-family="system-ui, sans-serif" font-size="7.8" font-weight="700" fill="#574C43" text-anchor="middle">4,620 / 5,000 Cargadas</text>
+        <text x="81" y="96" font-family="system-ui, sans-serif" font-size="7.5" font-weight="800" fill="#8C2D19" text-anchor="middle">Faltan 380 (-7.6%)</text>
+        <text x="81" y="112" font-family="system-ui, sans-serif" font-size="7.5" font-weight="800" fill="#8C2D19" text-anchor="middle">Multa Riesgo: $25k</text>
+      </g>
+
+      <g transform="translate(10, 180)">
+        <rect x="0" y="0" width="162" height="124" fill="#F5F5EB" stroke="#C1B6A3" stroke-width="1" rx="4"/>
+        <text x="10" y="20" font-family="system-ui, sans-serif" font-size="8" font-weight="800" fill="#2C2420">Rampa y Precinto</text>
+        <text x="10" y="38" font-family="system-ui, sans-serif" font-size="7.5" font-weight="600" fill="#574C43">Precinto de aduana: 05:30</text>
+        <text x="10" y="54" font-family="system-ui, sans-serif" font-size="7.2" font-weight="600" fill="#786B62">Tolerancia cero a demoras</text>
+        <rect x="10" y="68" width="142" height="26" fill="#EFE7DA" stroke="#B3907A" stroke-width="1" rx="3"/>
+        <text x="81" y="85" font-family="system-ui, sans-serif" font-size="7.5" font-weight="800" fill="#B3907A" text-anchor="middle">MUELLE CONECTADO</text>
+      </g>
+    </g>
+
+    <path d="M 404 120 L 422 120" stroke="#786B62" stroke-width="1.5" stroke-dasharray="3 2" marker-end="url(#bpArrow)"/>
+    <path d="M 638 120 L 654 120" stroke="#786B62" stroke-width="1.5" stroke-dasharray="3 2" marker-end="url(#bpArrow)"/>
+    <path d="M 190 280 L 422 280" stroke="#B3907A" stroke-width="1.5" stroke-dasharray="4 3" marker-end="url(#bpArrow)"/>
+
+    <g transform="translate(24, 380)">
+      <rect x="0" y="0" width="812" height="40" fill="#F5F5EB" stroke="#C1B6A3" stroke-width="1" rx="4"/>
+      <circle cx="18" cy="20" r="5" fill="#8C2D19"/>
+      <text x="30" y="24" font-family="system-ui, sans-serif" font-size="8" font-weight="700" fill="#2C2420">Alarma Mecánica (Husillo)</text>
+
+      <circle cx="230" cy="20" r="6" fill="none" stroke="#B3907A" stroke-width="1.5" stroke-dasharray="2 2"/>
+      <text x="244" y="24" font-family="system-ui, sans-serif" font-size="8" font-weight="700" fill="#2C2420">Liderazgo Informal (Café)</text>
+
+      <line x1="450" y1="20" x2="475" y2="20" stroke="#786B62" stroke-width="1.5" stroke-dasharray="3 2"/>
+      <text x="483" y="24" font-family="system-ui, sans-serif" font-size="8" font-weight="700" fill="#2C2420">Flujo de Piezas</text>
+
+      <rect x="635" y="13" width="14" height="14" fill="rgba(45, 74, 34, 0.2)" stroke="#2D4A22" stroke-width="1" rx="2"/>
+      <text x="655" y="24" font-family="system-ui, sans-serif" font-size="8" font-weight="700" fill="#2C2420">Muelle de Embarque</text>
+    </g>
+  </svg>`;
+}
+
 function getPortraitDonCarlosSvg(size = 72) {
   return `<svg viewBox="0 0 100 100" width="${size}" height="${size}" class="portrait-svg portrait-carlos" xmlns="http://www.w3.org/2000/svg">
     <circle cx="50" cy="50" r="47" fill="#F5F5EB" stroke="#B3907A" stroke-width="2.5"/>
@@ -576,35 +789,107 @@ function getPortraitDraMendozaSvg(size = 72) {
   </svg>`;
 }
 
-function getManagerialGridSvg(peopleScore=5.5, taskScore=5.5){
-  const clampedX=Math.max(1,Math.min(9,peopleScore)), clampedY=Math.max(1,Math.min(9,taskScore));
-  const originX=58, originY=370, gridWidth=432, gridHeight=320;
-  const plotX=originX+((clampedX-1)/8)*gridWidth, plotY=originY-((clampedY-1)/8)*gridHeight;
-  const gridLines=[1,2,3,4,5,6,7,8,9].map(i=>{
-    const gx=originX+((i-1)/8)*gridWidth, gy=originY-((i-1)/8)*gridHeight;
-    const isCenter=i===5;
-    const strokeStyle=isCenter?'stroke="#B3907A" stroke-width="1.2" stroke-dasharray="3 3"':'stroke="#C1B6A3" stroke-width="0.6" stroke-dasharray="2 2"';
-    return `<line x1="${gx}" y1="${originY}" x2="${gx}" y2="${originY-gridHeight}" ${strokeStyle}/><text x="${gx}" y="${originY+16}" font-family="monospace" font-size="9" font-weight="700" fill="#574C43" text-anchor="middle">${i}</text><line x1="${originX}" y1="${gy}" x2="${originX+gridWidth}" y2="${gy}" ${strokeStyle}/><text x="${originX-10}" y="${gy+3}" font-family="monospace" font-size="9" font-weight="700" fill="#574C43" text-anchor="end">${i}</text>`;
+function getManagerialGridSvg(peopleScore = 5.5, taskScore = 5.5) {
+  const clampedX = Math.max(1, Math.min(9, peopleScore));
+  const clampedY = Math.max(1, Math.min(9, taskScore));
+
+  const originX = 58;
+  const originY = 370;
+  const gridWidth = 432;
+  const gridHeight = 320;
+
+  const plotX = originX + ((clampedX - 1) / 8) * gridWidth;
+  const plotY = originY - ((clampedY - 1) / 8) * gridHeight;
+
+  const gridLines = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(i => {
+    const gx = originX + ((i - 1) / 8) * gridWidth;
+    const gy = originY - ((i - 1) / 8) * gridHeight;
+    const isCenter = i === 5;
+    const strokeStyle = isCenter ? 'stroke="#B3907A" stroke-width="1.2" stroke-dasharray="3 3"' : 'stroke="#C1B6A3" stroke-width="0.6" stroke-dasharray="2 2"';
+    return `
+      <line x1="${gx}" y1="${originY}" x2="${gx}" y2="${originY - gridHeight}" ${strokeStyle}/>
+      <text x="${gx}" y="${originY + 16}" font-family="monospace, sans-serif" font-size="9" font-weight="700" fill="#574C43" text-anchor="middle">${i}</text>
+      <line x1="${originX}" y1="${gy}" x2="${originX + gridWidth}" y2="${gy}" ${strokeStyle}/>
+      <text x="${originX - 10}" y="${gy + 3}" font-family="monospace, sans-serif" font-size="9" font-weight="700" fill="#574C43" text-anchor="end">${i}</text>
+    `;
   }).join('');
-  const isNearTop=plotY<(originY-gridHeight+50);
-  const tagY=isNearTop?(plotY+16):(plotY-30);
-  const tagX=Math.min(originX+gridWidth-118,Math.max(originX+6,plotX-58));
-  const arrowPath=isNearTop?`<polygon points="${plotX} ${plotY+7}, ${plotX-4} ${plotY+16}, ${plotX+4} ${plotY+16}" fill="#2C2420"/>`:`<polygon points="${plotX} ${plotY-7}, ${plotX-4} ${plotY-16}, ${plotX+4} ${plotY-16}" fill="#2C2420"/>`;
-  return `<svg viewBox="0 0 520 440" width="100%" height="auto" class="managerial-grid-svg" xmlns="http://www.w3.org/2000/svg">
+
+  const isNearTop = plotY < (originY - gridHeight + 50);
+  const tagY = isNearTop ? (plotY + 16) : (plotY - 30);
+  const tagX = Math.min(originX + gridWidth - 118, Math.max(originX + 6, plotX - 58));
+  const arrowPath = isNearTop
+    ? `<polygon points="${plotX} ${plotY + 7}, ${plotX - 4} ${plotY + 16}, ${plotX + 4} ${plotY + 16}" fill="#2C2420"/>`
+    : `<polygon points="${plotX} ${plotY - 7}, ${plotX - 4} ${plotY - 16}, ${plotX + 4} ${plotY - 16}" fill="#2C2420"/>`;
+
+  return `<svg viewBox="0 0 520 440" width="100%" height="auto" preserveAspectRatio="xMidYMid meet" class="managerial-grid-svg" xmlns="http://www.w3.org/2000/svg">
     <rect width="520" height="440" fill="#F5F5EB" rx="8"/>
-    <rect x="${originX}" y="${originY-gridHeight}" width="${gridWidth/2}" height="${gridHeight/2}" fill="#8C2D19" fill-opacity="0.04"/>
-    <rect x="${originX+gridWidth/2}" y="${originY-gridHeight}" width="${gridWidth/2}" height="${gridHeight/2}" fill="#2D4A22" fill-opacity="0.06"/>
-    <rect x="${originX}" y="${originY-gridHeight/2}" width="${gridWidth/2}" height="${gridHeight/2}" fill="#C1B6A3" fill-opacity="0.12"/>
-    <rect x="${originX+gridWidth/2}" y="${originY-gridHeight/2}" width="${gridWidth/2}" height="${gridHeight/2}" fill="#92400E" fill-opacity="0.05"/>
-    <rect x="${originX}" y="${originY-gridHeight}" width="${gridWidth}" height="${gridHeight}" fill="none" stroke="#C1B6A3" stroke-width="1.75"/>
+
+    <rect x="${originX}" y="${originY - gridHeight}" width="${gridWidth / 2}" height="${gridHeight / 2}" fill="#8C2D19" fill-opacity="0.04"/>
+    <rect x="${originX + gridWidth / 2}" y="${originY - gridHeight}" width="${gridWidth / 2}" height="${gridHeight / 2}" fill="#2D4A22" fill-opacity="0.06"/>
+    <rect x="${originX}" y="${originY - gridHeight / 2}" width="${gridWidth / 2}" height="${gridHeight / 2}" fill="#C1B6A3" fill-opacity="0.12"/>
+    <rect x="${originX + gridWidth / 2}" y="${originY - gridHeight / 2}" width="${gridWidth / 2}" height="${gridHeight / 2}" fill="#92400E" fill-opacity="0.05"/>
+
+    <rect x="${originX}" y="${originY - gridHeight}" width="${gridWidth}" height="${gridHeight}" fill="none" stroke="#C1B6A3" stroke-width="1.75"/>
+
     ${gridLines}
-    <text x="${originX+gridWidth/2}" y="${originY+38}" font-family="system-ui" font-size="9" font-weight="800" fill="#2C2420" text-anchor="middle">INTERÉS POR LAS PERSONAS (EJE X)</text>
-    <g transform="translate(16, ${originY-gridHeight/2}) rotate(-90)"><text x="0" y="0" font-family="system-ui" font-size="9" font-weight="800" fill="#2C2420" text-anchor="middle">INTERÉS POR LA PRODUCCIÓN (EJE Y)</text></g>
-    <circle cx="${plotX}" cy="${plotY}" r="22" fill="#B3907A" fill-opacity="0.25"><animate attributeName="r" values="8;24;8" dur="2.2s" repeatCount="indefinite"/><animate attributeName="fill-opacity" values="0.35;0.05;0.35" dur="2.2s" repeatCount="indefinite"/></circle>
-    <circle cx="${plotX}" cy="${plotY}" r="6.5" fill="#8C2D19" stroke="#FFFFFF" stroke-width="2"/>
-    ${arrowPath}
-    <rect x="${tagX}" y="${tagY}" width="116" height="20" rx="10" fill="#2C2420" fill-opacity="0.92" stroke="#B3907A" stroke-width="1"/>
-    <text x="${tagX+58}" y="${tagY+13}" font-family="monospace" font-size="8" font-weight="700" fill="#F5F5EB" text-anchor="middle">Tu Posición (${clampedX.toFixed(1)}, ${clampedY.toFixed(1)})</text>
+
+    <g transform="translate(${originX + 8}, ${originY - gridHeight + 8})">
+      <rect x="0" y="0" width="150" height="28" fill="#F5F5EB" fill-opacity="0.88" stroke="#8C2D19" stroke-width="1.2" rx="4"/>
+      <text x="8" y="12" font-family="system-ui, sans-serif" font-size="7.5" font-weight="800" fill="#8C2D19">9.1 AUTORIDAD-TAREA</text>
+      <text x="8" y="22" font-family="system-ui, sans-serif" font-size="6.8" font-weight="600" fill="#574C43">Taylorismo &bull; Coerción</text>
+    </g>
+
+    <g transform="translate(${originX + gridWidth - 158}, ${originY - gridHeight + 8})">
+      <rect x="0" y="0" width="150" height="28" fill="#F5F5EB" fill-opacity="0.88" stroke="#2D4A22" stroke-width="1.2" rx="4"/>
+      <text x="8" y="12" font-family="system-ui, sans-serif" font-size="7.5" font-weight="800" fill="#2D4A22">9.9 GESTIÓN DE EQUIPO</text>
+      <text x="8" y="22" font-family="system-ui, sans-serif" font-size="6.8" font-weight="600" fill="#574C43">Sinergia Sociotécnica</text>
+    </g>
+
+    <g transform="translate(${originX + 8}, ${originY - 36})">
+      <rect x="0" y="0" width="150" height="28" fill="#F5F5EB" fill-opacity="0.88" stroke="#786B62" stroke-width="1.2" rx="4"/>
+      <text x="8" y="12" font-family="system-ui, sans-serif" font-size="7.5" font-weight="800" fill="#786B62">1.1 EMPOBRECIDO</text>
+      <text x="8" y="22" font-family="system-ui, sans-serif" font-size="6.8" font-weight="600" fill="#574C43">Laissez-Faire &bull; Anomia</text>
+    </g>
+
+    <g transform="translate(${originX + gridWidth - 158}, ${originY - 36})">
+      <rect x="0" y="0" width="150" height="28" fill="#F5F5EB" fill-opacity="0.88" stroke="#92400E" stroke-width="1.2" rx="4"/>
+      <text x="8" y="12" font-family="system-ui, sans-serif" font-size="7.5" font-weight="800" fill="#92400E">1.9 CLUB CAMPESTRE</text>
+      <text x="8" y="22" font-family="system-ui, sans-serif" font-size="6.8" font-weight="600" fill="#574C43">Paternalismo &bull; Sin Control</text>
+    </g>
+
+    <g transform="translate(${originX + gridWidth / 2 - 65}, ${originY - gridHeight / 2 - 14})">
+      <rect x="0" y="0" width="130" height="28" fill="#F5F5EB" fill-opacity="0.92" stroke="#B3907A" stroke-width="1.2" stroke-dasharray="3 2" rx="4"/>
+      <text x="65" y="12" font-family="system-ui, sans-serif" font-size="7.5" font-weight="800" fill="#B3907A" text-anchor="middle">5.5 PUNTO MEDIO</text>
+      <text x="65" y="22" font-family="system-ui, sans-serif" font-size="6.8" font-weight="600" fill="#574C43" text-anchor="middle">Transaccional</text>
+    </g>
+
+    <text x="${originX + gridWidth / 2}" y="${originY + 38}" font-family="system-ui, sans-serif" font-size="9" font-weight="800" fill="#2C2420" text-anchor="middle" letter-spacing="0.5">
+      INTERÉS POR LAS PERSONAS Y FACTOR HUMANO (EJE X &rarr;)
+    </text>
+
+    <g transform="translate(16, ${originY - gridHeight / 2}) rotate(-90)">
+      <text x="0" y="0" font-family="system-ui, sans-serif" font-size="9" font-weight="800" fill="#2C2420" text-anchor="middle" letter-spacing="0.5">
+        &uarr; INTERÉS POR LA PRODUCCIÓN Y CONTROL TÉCNICO (EJE Y)
+      </text>
+    </g>
+
+    <g class="student-plot-node">
+      <circle cx="${plotX}" cy="${plotY}" r="22" fill="#B3907A" fill-opacity="0.25">
+        <animate attributeName="r" values="8;24;8" dur="2.2s" repeatCount="indefinite"/>
+        <animate attributeName="fill-opacity" values="0.35;0.05;0.35" dur="2.2s" repeatCount="indefinite"/>
+      </circle>
+      <circle cx="${plotX}" cy="${plotY}" r="15" fill="none" stroke="#8C2D19" stroke-width="2" stroke-opacity="0.8">
+        <animate attributeName="r" values="5;20;5" dur="2.2s" repeatCount="indefinite"/>
+        <animate attributeName="stroke-opacity" values="0.9;0.1;0.9" dur="2.2s" repeatCount="indefinite"/>
+      </circle>
+
+      <circle cx="${plotX}" cy="${plotY}" r="6.5" fill="#8C2D19" stroke="#FFFFFF" stroke-width="2"/>
+      <circle cx="${plotX}" cy="${plotY}" r="2" fill="#FFFFFF"/>
+
+      ${arrowPath}
+      <rect x="${tagX}" y="${tagY}" width="116" height="20" rx="10" fill="#2C2420" fill-opacity="0.92" stroke="#B3907A" stroke-width="1"/>
+      <text x="${tagX + 58}" y="${tagY + 13}" font-family="monospace, sans-serif" font-size="8" font-weight="700" fill="#F5F5EB" text-anchor="middle">Tu Posición (${clampedX.toFixed(1)}, ${clampedY.toFixed(1)})</text>
+    </g>
   </svg>`;
 }
 
@@ -755,7 +1040,8 @@ class SimulatorApp {
      'btnAdvanceFront','btnAdvanceText','plantLogFeed','repProfilePill','repTheoryPill','repVerdictTitle','repVerdictSummary',
      'repFinalMoral','repFinalMoralSub','repFinalProd','repFinalProdSub','repFinalQuality','repFinalQualitySub',
      'repClientBanner','repClientTitle','repClientText','auditCardsList','btnOpenMatrixFromRep','btnRestartFromRep',
-     'gridChartCoordsBadge','gridSvgContainer','gridDetailsCard'
+     'gridChartCoordsBadge','gridSvgContainer','gridDetailsCard',
+     'btnOpenBlueprint','btnCloseBlueprint','modalBlueprintBackdrop','prologueBlueprintContainer','modalBlueprintContainer'
     ].forEach(id => this.dom[id] = document.getElementById(id));
 
     this.dom.stepNodes = [this.dom.stepNode0,this.dom.stepNode1,this.dom.stepNode2,this.dom.stepNode3,this.dom.stepNode4,this.dom.stepNode5];
@@ -763,6 +1049,7 @@ class SimulatorApp {
 
     if (this.dom.avatarDonCarlosContainer) this.dom.avatarDonCarlosContainer.innerHTML = getPortraitDonCarlosSvg(72);
     if (this.dom.avatarMendozaContainer) this.dom.avatarMendozaContainer.innerHTML = getPortraitDraMendozaSvg(72);
+    if (this.dom.prologueBlueprintContainer) this.dom.prologueBlueprintContainer.innerHTML = getBlueprintSvg();
 
     this.bindEvents();
     this.renderTelemetry();
@@ -810,6 +1097,9 @@ class SimulatorApp {
       this.dom.iconAudioOff.style.display = this.sfx.muted ? 'inline' : 'none';
       if (!this.sfx.muted) this.sfx.playClick();
     });
+    if (this.dom.btnOpenBlueprint) this.dom.btnOpenBlueprint.addEventListener('click', () => this.openBlueprintModal());
+    if (this.dom.btnCloseBlueprint) this.dom.btnCloseBlueprint.addEventListener('click', () => this.closeBlueprintModal());
+    if (this.dom.modalBlueprintBackdrop) this.dom.modalBlueprintBackdrop.addEventListener('click', (e) => { if (e.target === this.dom.modalBlueprintBackdrop) this.closeBlueprintModal(); });
     this.dom.btnOpenMatrix.addEventListener('click', () => this.openMatrixModal());
     this.dom.btnCloseMatrix.addEventListener('click', () => this.closeMatrixModal());
     this.dom.modalMatrixBackdrop.addEventListener('click', (e) => { if (e.target === this.dom.modalMatrixBackdrop) this.closeMatrixModal(); });
@@ -842,6 +1132,16 @@ class SimulatorApp {
 
   openMatrixModal(){ this.sfx.playClick(); this.dom.modalMatrixBackdrop.classList.add('active'); document.body.style.overflow='hidden'; }
   closeMatrixModal(){ this.sfx.playClick(); this.dom.modalMatrixBackdrop.classList.remove('active'); document.body.style.overflow=''; }
+
+  openBlueprintModal(){
+    this.sfx.playClick();
+    if (this.dom.modalBlueprintContainer && !this.dom.modalBlueprintContainer.innerHTML.trim()) {
+      this.dom.modalBlueprintContainer.innerHTML = getBlueprintSvg();
+    }
+    this.dom.modalBlueprintBackdrop.classList.add('active');
+    document.body.style.overflow='hidden';
+  }
+  closeBlueprintModal(){ this.sfx.playClick(); this.dom.modalBlueprintBackdrop.classList.remove('active'); document.body.style.overflow=''; }
 
   restartSimulation(){
     this.sfx.playClick();
